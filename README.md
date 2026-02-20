@@ -187,6 +187,7 @@ For testing, `BDSE` is fine.
 
 ## Repository Structure
 
+```
 bdshare-amibroker-plugin/
 │
 ├── CMakeLists.txt                  # Build system — generates MSVC project (x86/x64)
@@ -222,7 +223,7 @@ bdshare-amibroker-plugin/
                                     #   candlesticks, bid/ask lines, YCP,
                                     #   MA(20/50), EMA(10), RSI(14),
                                     #   GetExtraData() depth/news examples
-
+```
 ---
 
 ## License
