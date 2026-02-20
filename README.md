@@ -1,0 +1,1 @@
+# bdshare_amibroker_plugin
