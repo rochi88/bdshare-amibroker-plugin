@@ -19,6 +19,7 @@
 #include "../include/DSEFetcher.h"
 
 #include <windows.h>
+#include <algorithm>
 #include <unordered_map>
 #include <vector>
 #include <string>
