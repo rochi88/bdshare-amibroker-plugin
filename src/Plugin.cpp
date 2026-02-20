@@ -308,7 +308,7 @@ PLUGINAPI int GetQuotesEx( LPCTSTR    ticker,
             quotes[i].Volume      = q.volume;
             quotes[i].OpenInterest= 0;
             quotes[i].AuxData1    = q.value;    // Aux1 = traded value
-            quotes[i].AuxData2    = q.trade;    // Aux2 = number of trades
+            quotes[i].AuxData2    = (float)q.trade; // Aux2 = number of trades
         }
         return n;
     }
@@ -334,8 +334,8 @@ PLUGINAPI int GetQuotesEx( LPCTSTR    ticker,
         quotes[idx].Price       = q.ltp;
         quotes[idx].Volume      = q.volume;
         quotes[idx].OpenInterest= 0;
-        quotes[idx].AuxData1    = q.ycp;    // Aux1 = yesterday's close
-        quotes[idx].AuxData2    = q.change; // Aux2 = price change
+        quotes[idx].AuxData1    = q.ycp;           // Aux1 = yesterday's close
+        quotes[idx].AuxData2    = (float)q.change; // Aux2 = price change
 
         return idx + 1;
     }
@@ -424,12 +424,3 @@ PLUGINAPI AmiVar GetExtraData( LPCTSTR     pszTicker,
 
     return result;
 }
-
-// Provide VAR_NONE / VAR_FLOAT / VAR_ARRAY constants that match ADK header
-// (In the real ADK header these come from Plugin.h — defined here for clarity)
-#ifndef VAR_NONE
-#define VAR_NONE    0
-#define VAR_FLOAT   1
-#define VAR_ARRAY   2
-struct AmiVar { int type; union { float val; float* array; }; };
-#endif

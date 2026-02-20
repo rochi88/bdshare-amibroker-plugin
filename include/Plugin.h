@@ -196,6 +196,25 @@ struct InfoSite
 // Streaming update message ID
 #define WM_USER_STREAMING_UPDATE (WM_USER + 2020)
 
+// ---------------------------------------------------------------------------
+// AmiVar – variant type returned by GetExtraData()
+// ---------------------------------------------------------------------------
+#define VAR_NONE    0
+#define VAR_FLOAT   1
+#define VAR_ARRAY   2
+#define VAR_STRING  3
+
+struct AmiVar
+{
+    int type;
+    union
+    {
+        float   val;
+        float*  array;
+        char*   string;
+    };
+};
+
 #pragma pack(pop)
 
 #endif // _PLUGIN_H_
