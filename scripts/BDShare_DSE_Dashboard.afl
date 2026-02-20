@@ -1,0 +1,79 @@
+// ============================================================================
+// BDShare_DSE_Dashboard.afl
+// Sample AFL formula demonstrating how to use BDShare DSE plugin data.
+//
+// Prerequisites:
+//   1. BDShare_DSE.dll installed in AmiBroker\Plugins\
+//   2. Symbol's "Name" field set to DSE code (e.g. GP, ACI, BEXIMCO)
+//   3. AmiBroker data source set to "BDShare DSE Data Feed"
+// ============================================================================
+
+_SECTION_BEGIN("BDShare DSE Live Dashboard");
+
+// ── Basic OHLCV (automatically supplied via GetQuotesEx) ──────────────────
+Plot( C, "Close",  colorWhite,  styleLine  | styleThick );
+Plot( O, "Open",   colorGreen,  styleDots  );
+Plot( H, "High",   colorLime,   styleLine  );
+Plot( L, "Low",    colorRed,    styleLine  );
+
+// ── Volume bars ───────────────────────────────────────────────────────────
+Plot( V, "Volume", colorBlue, styleHistogram | styleOwnScale );
+
+// ── Price-change colouring ────────────────────────────────────────────────
+// AuxData2 is loaded into the 'OpenInterest' field slot by the plugin;
+// access it via the built-in OpenInt() array.
+ChangeArr = AuxData2();    // price change vs yesterday
+BarColor  = IIf( ChangeArr >= 0, colorGreen, colorRed );
+PlotOHLC( O, H, L, C, "", BarColor, styleCandle );
+
+// ── Market Depth (best bid/ask) ───────────────────────────────────────────
+BidPrice = GetExtraData( Name(), "BidPrice", BarCount, 1, 1 );
+AskPrice = GetExtraData( Name(), "AskPrice", BarCount, 1, 1 );
+BidVol   = GetExtraData( Name(), "BidVol",   BarCount, 1, 1 );
+AskVol   = GetExtraData( Name(), "AskVol",   BarCount, 1, 1 );
+
+// Display best bid/ask in the title
+Spread = AskPrice - BidPrice;
+Title = StrFormat(
+    "{{NAME}}  |  O: %5.2f  H: %5.2f  L: %5.2f  C: %5.2f  V: %g\n"
+    "Bid: %5.2f (%g)  |  Ask: %5.2f (%g)  |  Spread: %5.2f",
+    O, H, L, C, V,
+    LastValue(BidPrice), LastValue(BidVol),
+    LastValue(AskPrice), LastValue(AskVol),
+    LastValue(Spread)
+);
+
+// Horizontal reference lines for bid/ask
+HorizLine( LastValue(BidPrice), colorCyan );
+HorizLine( LastValue(AskPrice), colorOrange );
+
+// ── Yesterday's close ─────────────────────────────────────────────────────
+YCP = AuxData();    // AuxData1 = yesterday close price
+HorizLine( LastValue(YCP), colorGrey40 );
+
+// ── News & Sector indicator ───────────────────────────────────────────────
+NewsCount   = GetExtraData( "", "NewsCount",  BarCount, 1, 1 );
+SectorChg   = GetExtraData( "", "SectorChg",  BarCount, 1, 1 );
+
+AddTextColumn( StrFormat("%g", LastValue(NewsCount)), "News Count", 1 );
+AddTextColumn( StrFormat("%.2f%%", LastValue(SectorChg)), "Sector Chg", 1 );
+
+// ── Simple moving averages (standard AFL) ────────────────────────────────
+MA20  = MA( C, 20 );
+MA50  = MA( C, 50 );
+EMA10 = EMA( C, 10 );
+
+Plot( MA20,  "MA(20)",  colorYellow, styleLine );
+Plot( MA50,  "MA(50)",  colorOrange, styleLine );
+Plot( EMA10, "EMA(10)", colorViolet, styleLine );
+
+// ── RSI panel ─────────────────────────────────────────────────────────────
+_SECTION_BEGIN("RSI");
+    r = RSI(14);
+    Plot( r, "RSI(14)", colorWhite, styleLine );
+    Plot( 70, "OB", colorRed,   styleLine | styleNoLabel );
+    Plot( 30, "OS", colorGreen, styleLine | styleNoLabel );
+    PlotGrid( 50, colorGrey40 );
+_SECTION_END();
+
+_SECTION_END();

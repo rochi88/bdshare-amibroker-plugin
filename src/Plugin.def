@@ -1,0 +1,12 @@
+; BDShare DSE AmiBroker Data Plugin
+; Module Definition File — controls exported symbol names exactly as ADK expects
+
+LIBRARY     "BDShare_DSE"
+
+EXPORTS
+    GetPluginInfo
+    GetPluginStatus
+    GetQuotesEx
+    GetExtraData
+    Configure
+    Notify
