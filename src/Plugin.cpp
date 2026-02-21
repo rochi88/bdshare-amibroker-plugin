@@ -1,18 +1,7 @@
 // ============================================================================
 // Plugin.cpp
 // AmiBroker Data Plugin DLL — BDShare DSE data feed
-//
-// Exported entry points (ADK 2.10):
-//   GetPluginInfo()       – identification
-//   GetQuotesEx()         – primary data delivery
-//   GetExtraData()        – depth, sector, news via AmiVar arrays
-//   Configure()           – settings dialog + InfoSite hook
-//   Notify()              – database/settings change notifications
-//   GetPluginStatus()     – status bar icon + text
-//
-// Streaming:
-//   Background thread polls DSE every ~5 s and posts
-//   WM_USER_STREAMING_UPDATE to AmiBroker's main window to trigger refresh.
+// Built against official ADK 2.1a (Plugin.h)
 // ============================================================================
 
 #include "../include/Plugin.h"
@@ -26,60 +15,91 @@
 #include <mutex>
 #include <thread>
 #include <atomic>
-#include <sstream>
 
 // ---------------------------------------------------------------------------
 // Plugin identity
 // ---------------------------------------------------------------------------
 #define PLUGIN_NAME     "BDShare DSE Data Feed"
 #define VENDOR_NAME     "BDShare"
-#define PLUGIN_VERSION   010008       // 1.0.8
+#define PLUGIN_VERSION   010009          // 1.0.9  (MAJOR*10000 + MINOR*100 + REL)
 #define PLUGIN_ID        PIDCODE('B','D','S','E')
-#define MIN_AB_VERSION  10000000L     // AmiBroker 5.27+
+#define MIN_AB_VERSION   530000          // AmiBroker 5.30+ (ADK 2.1)
 
 // ---------------------------------------------------------------------------
-// Live quote cache — keyed by uppercase symbol
+// AFL plugin stubs — Init/Release/GetFunctionTable/SetSiteInterface must be
+// exported even by pure data plugins or AmiBroker may refuse to load the DLL.
 // ---------------------------------------------------------------------------
-static std::mutex                           g_cacheMutex;
+FunctionTag       gFunctionTable[]   = {};
+int               gFunctionTableSize = 0;
+struct SiteInterface gSite           = {};
+
+PLUGINAPI int Init(void)    { return 1; }
+PLUGINAPI int Release(void) { return 1; }
+
+PLUGINAPI int GetFunctionTable( FunctionTag **ppFunctionTable )
+{
+    *ppFunctionTable = gFunctionTable;
+    return gFunctionTableSize;
+}
+
+PLUGINAPI int SetSiteInterface( struct SiteInterface *pInterface )
+{
+    gSite = *pInterface;
+    return 1;
+}
+
+// Legacy GetQuotes stub — required export for pre-5.27 compatibility
+PLUGINAPI int GetQuotes( LPCTSTR /*pszTicker*/, int /*nPeriodicity*/,
+                          int nLastValid, int /*nSize*/,
+                          struct QuotationFormat4 * /*pQuotes*/ )
+{
+    return nLastValid + 1;  // "no update"
+}
+
+// ---------------------------------------------------------------------------
+// Live quote cache
+// ---------------------------------------------------------------------------
+static std::mutex                                g_cacheMutex;
 static std::unordered_map<std::string, DSEQuote> g_liveCache;
-static std::vector<DSESectorEntry>          g_sectorCache;
-static std::vector<DSENewsItem>             g_newsCache;
+static std::vector<DSESectorEntry>               g_sectorCache;
+static std::vector<DSENewsItem>                  g_newsCache;
 
 // ---------------------------------------------------------------------------
 // Status
 // ---------------------------------------------------------------------------
-static std::atomic<int>   g_statusCode { STATUS_DISCONNECTED };
-static char               g_statusShort[16]  = "----";
-static char               g_statusLong[256]  = "Not connected";
+static std::atomic<int> g_statusCode { STATUS_DISCONNECTED };
+static char             g_statusShort[32]  = "----";   // matches PluginStatus.szShortMessage[32]
+static char             g_statusLong[256]  = "Not connected";
 
 static void SetGlobalStatus( int code, const char* sht, const char* lng )
 {
     g_statusCode = code;
-    strncpy_s( g_statusShort, sht, 15 );
-    strncpy_s( g_statusLong,  lng, 255 );
+    strncpy_s( g_statusShort, sizeof(g_statusShort), sht, _TRUNCATE );
+    strncpy_s( g_statusLong,  sizeof(g_statusLong),  lng, _TRUNCATE );
 }
 
 // ---------------------------------------------------------------------------
 // Streaming thread
 // ---------------------------------------------------------------------------
-static HWND                         g_hMainWnd  = nullptr;
-static std::atomic<bool>            g_running   { false };
-static std::thread                  g_thread;
-static DSEFetcher                   g_fetcher;
+static HWND              g_hMainWnd = nullptr;
+static std::atomic<bool> g_running  { false };
+static std::thread       g_thread;
+static DSEFetcher        g_fetcher;
 
 static void StreamingThread()
 {
-    SetGlobalStatus( STATUS_CONNECTING, "CONN", "Connecting to DSE…" );
+    SetGlobalStatus( STATUS_CONNECTING, "CONN", "Connecting to DSE..." );
 
     while ( g_running.load() )
     {
         std::vector<DSEQuote> live;
         bool ok = g_fetcher.FetchLive( live );
 
-        if ( ok && !live.empty() ) {
-            // Also fetch sector + news periodically (every ~60 s)
+        if ( ok && !live.empty() )
+        {
             static int cycle = 0;
-            if ( ++cycle % 12 == 0 ) {
+            if ( ++cycle % 12 == 0 )
+            {
                 std::vector<DSESectorEntry> sec;
                 if ( g_fetcher.FetchSectorPerformance( sec ) ) {
                     std::lock_guard<std::mutex> lk( g_cacheMutex );
@@ -94,23 +114,22 @@ static void StreamingThread()
 
             {
                 std::lock_guard<std::mutex> lk( g_cacheMutex );
-                for ( auto& q : live ) {
-                    std::string key = q.symbol;
-                    g_liveCache[ key ] = q;
-                }
+                for ( auto& q : live )
+                    g_liveCache[ q.symbol ] = q;
             }
 
-            SetGlobalStatus( STATUS_OK, "LIVE", "DSE live data — OK" );
+            SetGlobalStatus( STATUS_OK, "LIVE", "DSE live data - OK" );
 
-            // Notify AmiBroker that new data arrived → triggers GetQuotesEx()
+            // WM_USER_STREAMING_UPDATE = WM_USER+13000 (official ADK value)
             if ( g_hMainWnd )
                 PostMessage( g_hMainWnd, WM_USER_STREAMING_UPDATE, 0, 0 );
-        } else {
+        }
+        else
+        {
             SetGlobalStatus( STATUS_WAIT, "WAIT",
-                ( "DSE fetch error: " + g_fetcher.LastError() ).c_str() );
+                ("DSE fetch error: " + g_fetcher.LastError()).c_str() );
         }
 
-        // Poll every 5 seconds (DSE refreshes roughly every 15–30 s in real-time)
         for ( int i = 0; i < 50 && g_running.load(); ++i )
             Sleep( 100 );
     }
@@ -139,86 +158,88 @@ BOOL APIENTRY DllMain( HMODULE /*hModule*/, DWORD reason, LPVOID /*reserved*/ )
 // ===========================================================================
 
 // ---------------------------------------------------------------------------
-// GetPluginInfo  – called once at load time
+// GetPluginInfo
 // ---------------------------------------------------------------------------
-PLUGINAPI int GetPluginInfo( struct PluginInfo* info )
+PLUGINAPI int GetPluginInfo( struct PluginInfo *pInfo )
 {
-    info->nStructSize   = sizeof( PluginInfo );
-    info->nType         = PLUGIN_TYPE_DATA;
-    info->nVersion      = PLUGIN_VERSION;
-    info->nIDCode       = PLUGIN_ID;
-    info->szName        = TEXT( PLUGIN_NAME );
-    info->szVendor      = TEXT( VENDOR_NAME );
-    info->nCertificate  = 0;
-    info->nMinAmiVersion= MIN_AB_VERSION;
+    pInfo->nStructSize    = sizeof( PluginInfo );
+    pInfo->nType          = PLUGIN_TYPE_DATA;
+    pInfo->nVersion       = PLUGIN_VERSION;
+    pInfo->nIDCode        = PLUGIN_ID;
+    pInfo->nCertificate   = 0;
+    pInfo->nMinAmiVersion = MIN_AB_VERSION;
+
+    // szName and szVendor are char[64], NOT LPCTSTR — use strcpy_s
+    strcpy_s( pInfo->szName,   sizeof(pInfo->szName),   PLUGIN_NAME );
+    strcpy_s( pInfo->szVendor, sizeof(pInfo->szVendor), VENDOR_NAME );
+
     return 1;
 }
 
 // ---------------------------------------------------------------------------
-// GetPluginStatus  – called to paint the status bar icon
+// GetPluginStatus
 // ---------------------------------------------------------------------------
-PLUGINAPI int GetPluginStatus( struct PluginStatus* status )
+PLUGINAPI int GetPluginStatus( struct PluginStatus *status )
 {
     status->nStructSize = sizeof( PluginStatus );
     status->nStatusCode = g_statusCode;
 
     switch ( g_statusCode ) {
-        case STATUS_OK:           status->clrStatusColor = RGB(0,200,0);   break;
-        case STATUS_WAIT:         status->clrStatusColor = RGB(255,165,0); break;
-        case STATUS_CONNECTING:   status->clrStatusColor = RGB(0,120,215); break;
-        case STATUS_ERROR:        status->clrStatusColor = RGB(220,0,0);   break;
-        default:                  status->clrStatusColor = RGB(180,180,180);
+        case STATUS_OK:         status->clrStatusColor = RGB(0,200,0);   break;
+        case STATUS_WAIT:       status->clrStatusColor = RGB(255,165,0); break;
+        case STATUS_CONNECTING: status->clrStatusColor = RGB(0,120,215); break;
+        case STATUS_ERROR:      status->clrStatusColor = RGB(220,0,0);   break;
+        default:                status->clrStatusColor = RGB(180,180,180);
     }
 
-    strncpy_s( status->szShortMessage, g_statusShort, 15 );
-    strncpy_s( status->szLongMessage,  g_statusLong,  255 );
+    strcpy_s( status->szShortMessage, sizeof(status->szShortMessage), g_statusShort );
+    strcpy_s( status->szLongMessage,  sizeof(status->szLongMessage),  g_statusLong  );
     return 1;
 }
 
 // ---------------------------------------------------------------------------
-// Configure  – called when user selects the plugin as data source
+// Configure — hMainWnd comes from InfoSite in earlier ADK; from
+//             PluginNotification in ADK 2.1.  InfoSite has no hMainWnd field,
+//             so we save the path and grab the window via FindWindow instead.
 // ---------------------------------------------------------------------------
-PLUGINAPI int Configure( LPCTSTR /*pszPath*/, struct InfoSite* pSite )
+PLUGINAPI int Configure( LPCTSTR /*pszPath*/, struct InfoSite * /*pSite*/ )
 {
-    if ( pSite ) {
-        g_hMainWnd = pSite->hMainWnd;
-    }
+    // Grab the main window if we don't have it yet
+    if ( !g_hMainWnd )
+        g_hMainWnd = FindWindow( TEXT("AmiBroker"), nullptr );
 
-    // Start streaming thread if not already running
     if ( !g_running.load() ) {
         g_running = true;
-        g_thread = std::thread( StreamingThread );
+        g_thread  = std::thread( StreamingThread );
     }
 
     MessageBox(
         g_hMainWnd,
-        TEXT( "BDShare DSE Data Feed v1.0.5\n\n"
-              "Data is fetched directly from www.dsebd.org.\n\n"
-              "• Live prices refresh every ~5 seconds.\n"
-              "• Historical data is fetched on demand per symbol.\n"
-              "• Market depth available via GetExtraData().\n"
-              "• Sector & news data refresh every ~60 seconds.\n\n"
-              "Set a symbol's name to its DSE code (e.g. GP, ACI, BEXIMCO).\n"
-              "Use Tools → Preferences → Data → In-memory cache to control\n"
-              "how many symbols AmiBroker keeps in RAM." ),
-        TEXT( "BDShare DSE Plugin" ),
+        TEXT("BDShare DSE Data Feed v1.0.8\r\n\r\n"
+             "Fetches live and historical data from www.dsebd.org.\r\n\r\n"
+             "- Live prices: polled every ~5 seconds\r\n"
+             "- Historical OHLCV: fetched on demand (up to 2 years)\r\n"
+             "- Market depth, sector, news via GetExtraData()\r\n\r\n"
+             "Set each symbol's ticker to its DSE code (e.g. GP, ACI)."),
+        TEXT("BDShare DSE Plugin"),
         MB_OK | MB_ICONINFORMATION
     );
-
     return 1;
 }
 
 // ---------------------------------------------------------------------------
-// Notify  – database load/unload and settings changes
+// Notify — hMainWnd is reliably available here (ADK 2.1)
 // ---------------------------------------------------------------------------
-PLUGINAPI int Notify( struct PluginNotification* pNotify )
+PLUGINAPI int Notify( struct PluginNotification *pNotify )
 {
     if ( !pNotify ) return 0;
 
     switch ( pNotify->nReason )
     {
         case REASON_DATABASE_LOADED:
-            g_hMainWnd = FindWindow( TEXT("AmiBroker"), nullptr );
+            // hMainWnd is in PluginNotification, not InfoSite
+            if ( pNotify->hMainWnd )
+                g_hMainWnd = pNotify->hMainWnd;
             if ( !g_running.load() ) {
                 g_running = true;
                 g_thread  = std::thread( StreamingThread );
@@ -227,39 +248,27 @@ PLUGINAPI int Notify( struct PluginNotification* pNotify )
 
         case REASON_DATABASE_UNLOADED:
             g_running = false;
-            if ( g_thread.joinable() ) {
+            if ( g_thread.joinable() )
                 g_thread.join();
-            }
             SetGlobalStatus( STATUS_DISCONNECTED, "----", "Database unloaded" );
             break;
 
         case REASON_SETTINGS_CHANGE:
-            // Nothing to do — no user-configurable settings yet
             break;
     }
     return 1;
 }
 
 // ---------------------------------------------------------------------------
-// GetQuotesEx  – primary data delivery; called by AmiBroker 5.27+
-//
-// AmiBroker passes:
-//   ticker      – symbol string (e.g. "GP")
-//   periodicity – PERIODICITY_EOD or intraday constant
-//   lastValid   – index of the last valid bar already cached by AmiBroker
-//   size        – maximum number of Quotation records we can write
-//   quotes      – output array (pre-allocated by AmiBroker)
-//   context     – reserved, may be NULL
-//
-// Returns the number of valid bars written (starting at index 0).
-// Return lastValid+1 to signal "no update, keep existing data".
+// GetQuotesEx
+// PERIODICITY_EOD = 86400, PERIODICITY_1MIN = 60 (official values)
 // ---------------------------------------------------------------------------
-PLUGINAPI int GetQuotesEx( LPCTSTR    ticker,
-                             int        periodicity,
-                             int        lastValid,
-                             int        size,
-                             Quotation* quotes,
-                             GQEContext* /*context*/ )
+PLUGINAPI int GetQuotesEx( LPCTSTR      ticker,
+                             int          periodicity,
+                             int          lastValid,
+                             int          size,
+                             Quotation   *quotes,
+                             GQEContext * /*context*/ )
 {
     if ( !ticker || !quotes || size <= 0 ) return 0;
 
@@ -271,14 +280,9 @@ PLUGINAPI int GetQuotesEx( LPCTSTR    ticker,
     std::string symbol = ticker;
 #endif
 
-    // -----------------------------------------------------------------------
-    // EOD / Historical path
-    // -----------------------------------------------------------------------
-    if ( periodicity == PERIODICITY_EOD ||
-         periodicity == PERIODICITY_WEEKLY ||
-         periodicity == PERIODICITY_MONTHLY )
+    // ── EOD / Historical path ─────────────────────────────────────────────
+    if ( periodicity == PERIODICITY_EOD )
     {
-        // Ask for 2 years of history
         SYSTEMTIME today = {};
         GetLocalTime( &today );
 
@@ -288,9 +292,8 @@ PLUGINAPI int GetQuotesEx( LPCTSTR    ticker,
 
         std::vector<DSEQuote> hist;
         if ( !g_fetcher.FetchHistorical( symbol, startDate, endDate, hist ) )
-            return lastValid + 1;   // keep existing
+            return lastValid + 1;
 
-        // Sort ascending by date
         std::sort( hist.begin(), hist.end(), []( const DSEQuote& a, const DSEQuote& b ) {
             if ( a.year  != b.year  ) return a.year  < b.year;
             if ( a.month != b.month ) return a.month < b.month;
@@ -300,22 +303,21 @@ PLUGINAPI int GetQuotesEx( LPCTSTR    ticker,
         int n = std::min( (int)hist.size(), size );
         for ( int i = 0; i < n; ++i ) {
             const DSEQuote& q = hist[i];
-            quotes[i].DateTime    = PackDate( q.year, q.month, q.day );
+            // EOD bar: use sentinel hours/minutes so AB treats it as end-of-day
+            quotes[i].DateTime    = MakeAmiDate( q.year, q.month, q.day );
             quotes[i].Open        = q.open;
             quotes[i].High        = q.high;
             quotes[i].Low         = q.low;
             quotes[i].Price       = q.close;
             quotes[i].Volume      = q.volume;
-            quotes[i].OpenInterest= 0;
-            quotes[i].AuxData1    = q.value;    // Aux1 = traded value
-            quotes[i].AuxData2    = (float)q.trade; // Aux2 = number of trades
+            quotes[i].OpenInterest= 0.f;
+            quotes[i].AuxData1    = q.value;
+            quotes[i].AuxData2    = (float)q.trade;
         }
         return n;
     }
 
-    // -----------------------------------------------------------------------
-    // Intraday / real-time path — serve from live cache
-    // -----------------------------------------------------------------------
+    // ── Intraday / real-time path ─────────────────────────────────────────
     {
         std::lock_guard<std::mutex> lk( g_cacheMutex );
         auto it = g_liveCache.find( symbol );
@@ -326,48 +328,38 @@ PLUGINAPI int GetQuotesEx( LPCTSTR    ticker,
         int idx = ( lastValid < 0 ) ? 0 : lastValid + 1;
         if ( idx >= size ) return lastValid + 1;
 
-        quotes[idx].DateTime    = PackDate( q.year, q.month, q.day,
-                                             q.hour, q.minute, q.second );
-        quotes[idx].Open        = ( q.open  > 0 ) ? q.open  : q.ltp;
-        quotes[idx].High        = ( q.high  > 0 ) ? q.high  : q.ltp;
-        quotes[idx].Low         = ( q.low   > 0 ) ? q.low   : q.ltp;
+        quotes[idx].DateTime    = MakeAmiDate( q.year, q.month, q.day,
+                                               q.hour, q.minute, q.second );
+        quotes[idx].Open        = ( q.open > 0.f ) ? q.open : q.ltp;
+        quotes[idx].High        = ( q.high > 0.f ) ? q.high : q.ltp;
+        quotes[idx].Low         = ( q.low  > 0.f ) ? q.low  : q.ltp;
         quotes[idx].Price       = q.ltp;
         quotes[idx].Volume      = q.volume;
-        quotes[idx].OpenInterest= 0;
-        quotes[idx].AuxData1    = q.ycp;           // Aux1 = yesterday's close
-        quotes[idx].AuxData2    = (float)q.change; // Aux2 = price change
-
+        quotes[idx].OpenInterest= 0.f;
+        quotes[idx].AuxData1    = q.ycp;
+        quotes[idx].AuxData2    = q.change;
         return idx + 1;
     }
 }
 
 // ---------------------------------------------------------------------------
-// GetExtraData  – non-price arrays: depth, sector, news
-//
-// AmiBroker AFL can access these via:
-//   GetExtraData( "GP", "BidPrice",   BarCount, 1, 1 )
-//   GetExtraData( "GP", "BidVol",     BarCount, 1, 1 )
-//   GetExtraData( "GP", "AskPrice",   BarCount, 1, 1 )
-//   GetExtraData( "GP", "AskVol",     BarCount, 1, 1 )
-//   GetExtraData( "",   "SectorChg",  BarCount, 1, 1 )
-//   GetExtraData( "",   "News",       BarCount, 1, 1 )  ← headline strings
+// GetExtraData
 // ---------------------------------------------------------------------------
-PLUGINAPI AmiVar GetExtraData( LPCTSTR     pszTicker,
-                                 LPCTSTR     pszName,
-                                 int         nArraySize,
-                                 int         /*nPeriodicity*/,
-                                 void*     (*pfAlloc)(unsigned int) )
+PLUGINAPI AmiVar GetExtraData( LPCTSTR  pszTicker,
+                                 LPCTSTR  pszName,
+                                 int      nArraySize,
+                                 int      /*nPeriodicity*/,
+                                 void*  (*pfAlloc)(unsigned int) )
 {
-    AmiVar result;
-    result.type  = VAR_NONE;
-    result.val   = 0.0f;
+    AmiVar result = {};
+    result.type = VAR_NONE;
 
     if ( !pszName || !pfAlloc ) return result;
 
 #ifdef UNICODE
     char nameBuf[64] = {}, tickBuf[64] = {};
-    WideCharToMultiByte( CP_ACP, 0, pszName,   -1, nameBuf,  63, nullptr, nullptr );
-    WideCharToMultiByte( CP_ACP, 0, pszTicker, -1, tickBuf,  63, nullptr, nullptr );
+    WideCharToMultiByte( CP_ACP, 0, pszName,   -1, nameBuf, 63, nullptr, nullptr );
+    WideCharToMultiByte( CP_ACP, 0, pszTicker, -1, tickBuf, 63, nullptr, nullptr );
     std::string name   = nameBuf;
     std::string symbol = tickBuf;
 #else
@@ -375,48 +367,41 @@ PLUGINAPI AmiVar GetExtraData( LPCTSTR     pszTicker,
     std::string symbol = pszTicker ? pszTicker : "";
 #endif
 
-    std::lock_guard<std::mutex> lk( g_cacheMutex );
-
-    // ---- Market depth arrays -------------------------------------------- //
-    auto itDep = g_liveCache.find( symbol );
-
     auto MakeFloatArray = [&]( float value ) -> AmiVar {
-        AmiVar av;
+        AmiVar av = {};
         av.type  = VAR_ARRAY;
-        float* arr = (float*)pfAlloc( sizeof(float) * nArraySize );
-        for ( int i = 0; i < nArraySize; ++i ) arr[i] = value;
+        float *arr = static_cast<float*>( pfAlloc( sizeof(float) * nArraySize ) );
+        if ( arr ) {
+            for ( int i = 0; i < nArraySize; ++i ) arr[i] = value;
+        }
         av.array = arr;
         return av;
     };
 
+    std::lock_guard<std::mutex> lk( g_cacheMutex );
+
     if ( name == "BidPrice" || name == "AskPrice" ||
          name == "BidVol"   || name == "AskVol" )
     {
-        // Fetch fresh depth for this symbol (can't cache per-symbol here easily)
         DSEDepth dep = {};
         if ( g_fetcher.FetchDepth( symbol, dep ) && dep.levels > 0 ) {
-            float val = 0.0f;
-            if ( name == "BidPrice" ) val = dep.buyPrice[0];
-            if ( name == "AskPrice" ) val = dep.sellPrice[0];
-            if ( name == "BidVol"   ) val = (float)dep.buyVolume[0];
-            if ( name == "AskVol"   ) val = (float)dep.sellVolume[0];
+            float val = 0.f;
+            if      ( name == "BidPrice" ) val = dep.buyPrice[0];
+            else if ( name == "AskPrice" ) val = dep.sellPrice[0];
+            else if ( name == "BidVol"   ) val = (float)dep.buyVolume[0];
+            else if ( name == "AskVol"   ) val = (float)dep.sellVolume[0];
             return MakeFloatArray( val );
         }
-        return MakeFloatArray( 0.0f );
+        return MakeFloatArray( 0.f );
     }
 
-    // ---- Sector change array -------------------------------------------- //
-    if ( name == "SectorChg" )
-    {
-        // Return first sector's change as a scalar fill (placeholder)
-        float val = g_sectorCache.empty() ? 0.0f : g_sectorCache[0].change;
+    if ( name == "SectorChg" ) {
+        float val = g_sectorCache.empty() ? 0.f : g_sectorCache[0].change;
         return MakeFloatArray( val );
     }
 
-    // ---- News count scalar (AFL can check if news count > threshold) ------ //
-    if ( name == "NewsCount" )
-    {
-        AmiVar av;
+    if ( name == "NewsCount" ) {
+        AmiVar av = {};
         av.type = VAR_FLOAT;
         av.val  = (float)g_newsCache.size();
         return av;
