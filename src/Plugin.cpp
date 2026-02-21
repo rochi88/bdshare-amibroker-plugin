@@ -20,7 +20,7 @@
 // ---------------------------------------------------------------------------
 #define PLUGIN_NAME     "BDShare DSE Data Feed"
 #define VENDOR_NAME     "BDShare"
-#define PLUGIN_VERSION   010100          // 1.1.0  (MAJOR*10000 + MINOR*100 + REL)
+#define PLUGIN_VERSION   010101          // 1.1.1  (MAJOR*10000 + MINOR*100 + REL)
 #define PLUGIN_ID        PIDCODE('B','D','S','E')
 #define MIN_AB_VERSION   530000          // AmiBroker 5.30+ (ADK 2.1)
 
@@ -28,8 +28,11 @@
 // AFL plugin stubs — Init/Release/GetFunctionTable/SetSiteInterface must be
 // exported even by pure data plugins or AmiBroker may refuse to load the DLL.
 // ---------------------------------------------------------------------------
-FunctionTag       gFunctionTable[]   = {};
-int               gFunctionTableSize = 0;
+// MSVC C2466: zero-size arrays are illegal in C++.
+// One null-sentinel entry; gFunctionTableSize=0 tells AmiBroker: no AFL functions.
+static FunctionTag _gFTStorage = { nullptr, { nullptr, 0, 0, 0, 0, nullptr } };
+FunctionTag       *gFunctionTable    = &_gFTStorage;
+int                gFunctionTableSize = 0;
 struct SiteInterface gSite           = {};
 
 PLUGINAPI int Init(void)    { return 1; }

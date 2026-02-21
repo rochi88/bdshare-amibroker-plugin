@@ -23,10 +23,14 @@
 #define PLUGIN_TYPE_AFL_AND_DATA    3
 #define PLUGIN_TYPE_OPTIMIZER       4
 
-#ifdef _USRDLL
-#define PLUGINAPI extern "C" __declspec(dllexport)
+// PLUGINAPI: when building the plugin DLL itself, we always want dllexport.
+// We define BUILDING_BDSHARE_DLL in CMakeLists.txt via target_compile_definitions.
+// Callers who link against the import lib would define neither and get dllimport,
+// but AmiBroker loads via LoadLibrary/GetProcAddress so no import lib is ever needed.
+#if defined(BUILDING_BDSHARE_DLL) || defined(_USRDLL)
+#  define PLUGINAPI extern "C" __declspec(dllexport)
 #else
-#define PLUGINAPI extern "C" __declspec(dllimport)
+#  define PLUGINAPI extern "C" __declspec(dllexport)   // safe default: always export
 #endif
 
 #define DATE_TIME_INT unsigned __int64
@@ -103,8 +107,8 @@ typedef struct FunctionTag {
 PLUGINAPI int GetFunctionTable( FunctionTag **ppFunctionTable );
 PLUGINAPI int SetSiteInterface( struct SiteInterface *pInterface );
 
-extern FunctionTag gFunctionTable[];
-extern int         gFunctionTableSize;
+extern FunctionTag *gFunctionTable;
+extern int          gFunctionTableSize;
 extern struct SiteInterface gSite;
 
 // ── Data plugin constants ────────────────────────────────────────────────────
