@@ -33,7 +33,7 @@
 // ---------------------------------------------------------------------------
 #define PLUGIN_NAME     "BDShare DSE Data Feed"
 #define VENDOR_NAME     "BDShare"
-#define PLUGIN_VERSION   010005       // 1.0.5
+#define PLUGIN_VERSION   010008       // 1.0.8
 #define PLUGIN_ID        PIDCODE('B','D','S','E')
 #define MIN_AB_VERSION  10000000L     // AmiBroker 5.27+
 
