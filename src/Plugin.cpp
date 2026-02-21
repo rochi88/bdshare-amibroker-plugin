@@ -7,7 +7,6 @@
 #include "../include/Plugin.h"
 #include "../include/DSEFetcher.h"
 
-#include <windows.h>
 #include <algorithm>
 #include <unordered_map>
 #include <vector>
@@ -21,7 +20,7 @@
 // ---------------------------------------------------------------------------
 #define PLUGIN_NAME     "BDShare DSE Data Feed"
 #define VENDOR_NAME     "BDShare"
-#define PLUGIN_VERSION   010009          // 1.0.9  (MAJOR*10000 + MINOR*100 + REL)
+#define PLUGIN_VERSION   010100          // 1.1.0  (MAJOR*10000 + MINOR*100 + REL)
 #define PLUGIN_ID        PIDCODE('B','D','S','E')
 #define MIN_AB_VERSION   530000          // AmiBroker 5.30+ (ADK 2.1)
 

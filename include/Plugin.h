@@ -8,6 +8,16 @@
 #ifndef PLUGIN_H
 #define PLUGIN_H 1
 
+// Must come first — defines BOOL, HWND, COLORREF, LPCTSTR, etc.
+// The include guard above prevents double-inclusion problems.
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+
 #define PLUGIN_TYPE_AFL             1
 #define PLUGIN_TYPE_DATA            2
 #define PLUGIN_TYPE_AFL_AND_DATA    3
