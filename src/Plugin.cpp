@@ -20,7 +20,7 @@
 // ---------------------------------------------------------------------------
 #define PLUGIN_NAME     "BDShare DSE Data Feed"
 #define VENDOR_NAME     "BDShare"
-#define PLUGIN_VERSION   010101          // 1.1.1  (MAJOR*10000 + MINOR*100 + REL)
+#define PLUGIN_VERSION   010102          // 1.1.2  (MAJOR*10000 + MINOR*100 + REL)
 #define PLUGIN_ID        PIDCODE('B','D','S','E')
 #define MIN_AB_VERSION   530000          // AmiBroker 5.30+ (ADK 2.1)
 
@@ -217,7 +217,7 @@ PLUGINAPI int Configure( LPCTSTR /*pszPath*/, struct InfoSite * /*pSite*/ )
 
     MessageBox(
         g_hMainWnd,
-        TEXT("BDShare DSE Data Feed v1.0.8\r\n\r\n"
+        TEXT("BDShare DSE Data Feed v1.1.2\r\n\r\n"
              "Fetches live and historical data from www.dsebd.org.\r\n\r\n"
              "- Live prices: polled every ~5 seconds\r\n"
              "- Historical OHLCV: fetched on demand (up to 2 years)\r\n"
