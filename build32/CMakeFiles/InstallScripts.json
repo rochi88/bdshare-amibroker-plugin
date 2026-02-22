@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"D:/software/bdshare-amibroker-plugin/build32/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

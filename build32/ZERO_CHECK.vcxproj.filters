@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\software\bdshare-amibroker-plugin\build32\CMakeFiles\60422abb8cd0b2041f6823e9d1b90bf9\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{EEB8BFF7-D210-3638-88D2-A48AF231490E}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

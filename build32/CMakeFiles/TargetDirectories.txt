@@ -1,0 +1,3 @@
+D:/software/bdshare-amibroker-plugin/build32/CMakeFiles/BDShare_DSE.dir
+D:/software/bdshare-amibroker-plugin/build32/CMakeFiles/ALL_BUILD.dir
+D:/software/bdshare-amibroker-plugin/build32/CMakeFiles/ZERO_CHECK.dir

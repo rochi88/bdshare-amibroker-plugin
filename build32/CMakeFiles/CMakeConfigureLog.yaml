@@ -1,0 +1,909 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineSystem.cmake:212 (message)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      The system is: Windows - 10.0.19045 - AMD64
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:468 (find_file)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:506 (CMAKE_DETERMINE_COMPILER_ID_WRITE)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:8 (CMAKE_DETERMINE_COMPILER_ID_BUILD)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:125 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "file"
+    variable: "src_in"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "CMakeCXXCompilerId.cpp.in"
+    candidate_directories:
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/"
+    found: "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeCXXCompilerId.cpp.in"
+    search_context:
+      ENV{PATH}:
+        - "C:\\Program Files (x86)\\Intel\\iCLS Client\\"
+        - "C:\\Program Files\\Intel\\iCLS Client\\"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\DAL"
+        - "C:\\Program Files\\Intel\\Intel(R) Management Engine Components\\DAL"
+        - "C:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\IPT"
+        - "C:\\Program Files\\Intel\\Intel(R) Management Engine Components\\IPT"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Users\\rahat\\AppData\\Roaming\\npm"
+        - "C:\\Program Files\\Microsoft SQL Server\\120\\Tools\\Binn\\"
+        - "D:\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\CMake\\bin"
+        - "C:\\Users\\rahat\\AppData\\Local\\Android\\Sdk\\platform-tools"
+        - "C:\\Users\\rahat\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\"
+        - "C:\\Users\\rahat\\AppData\\Local\\Programs\\Python\\Python313\\"
+        - "C:\\Users\\rahat\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\rahat\\AppData\\Roaming\\npm"
+        - "C:\\Users\\rahat\\AppData\\Local\\Pandoc\\"
+        - "D:\\software\\Antigravity\\bin"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:125 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      MSBuild version 18.4.0+6e61e96ac for .NET Framework
+      Build started 22/02/2026 3:52:55 PM.
+      
+      Project "D:\\software\\bdshare-amibroker-plugin\\build32\\CMakeFiles\\4.3.0-rc1\\CompilerIdCXX\\CompilerIdCXX.vcxproj" on node 1 (default targets).
+      PrepareForBuild:
+        Creating directory "Debug\\".
+        Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+        Creating directory "Debug\\CompilerIdCXX.tlog\\".
+      InitializeBuildStatus:
+        Creating "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+        Touching "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild".
+      ClCompile:
+        D:\\software\\Visual studio\\Insiders\\VC\\Tools\\MSVC\\14.50.35717\\bin\\HostX64\\x86\\CL.exe /c /nologo /W0 /WX- /diagnostics:column /Od /Oy- /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc145.pdb" /external:W0 /Gd /TP /analyze- /FC /errorReport:queue CMakeCXXCompilerId.cpp
+        CMakeCXXCompilerId.cpp
+      Link:
+        D:\\software\\Visual studio\\Insiders\\VC\\Tools\\MSVC\\14.50.35717\\bin\\HostX64\\x86\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdCXX.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdCXX.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdCXX.lib" /MACHINE:X86 /SAFESEH Debug\\CMakeCXXCompilerId.obj
+        CompilerIdCXX.vcxproj -> D:\\software\\bdshare-amibroker-plugin\\build32\\CMakeFiles\\4.3.0-rc1\\CompilerIdCXX\\CompilerIdCXX.exe
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_CXX_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_CXX_COMPILER=D:\\software\\Visual studio\\Insiders\\VC\\Tools\\MSVC\\14.50.35717\\bin\\Hostx64\\x86\\cl.exe
+      FinalizeBuildStatus:
+        Deleting file "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild".
+        Touching "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.lastbuildstate".
+      Done Building Project "D:\\software\\bdshare-amibroker-plugin\\build32\\CMakeFiles\\4.3.0-rc1\\CompilerIdCXX\\CompilerIdCXX.vcxproj" (default targets).
+      
+      Build succeeded.
+          0 Warning(s)
+          0 Error(s)
+      
+      Time Elapsed 00:00:09.07
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.vcxproj"
+      
+      The CXX compiler identification is MSVC, found in:
+        D:/software/bdshare-amibroker-plugin/build32/CMakeFiles/4.3.0-rc1/CompilerIdCXX/CompilerIdCXX.exe
+      
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:37 (find_program)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:65 (__resolve_tool_path)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:103 (__resolve_linker_path)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "_CMAKE_TOOL_WITH_PATH"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "link"
+    candidate_directories:
+      - "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x86/"
+      - "C:/Program Files (x86)/Intel/iCLS Client/"
+      - "C:/Program Files/Intel/iCLS Client/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL/"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/DAL/"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/IPT/"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/IPT/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Users/rahat/AppData/Roaming/npm/"
+      - "C:/Program Files/Microsoft SQL Server/120/Tools/Binn/"
+      - "D:/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/CMake/bin/"
+      - "C:/Users/rahat/AppData/Local/Android/Sdk/platform-tools/"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/Scripts/"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/"
+      - "C:/Users/rahat/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/rahat/AppData/Local/Pandoc/"
+      - "D:/software/Antigravity/bin/"
+    searched_directories:
+      - "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x86/link.com"
+    found: "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x86/link.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\Program Files (x86)\\Intel\\iCLS Client\\"
+        - "C:\\Program Files\\Intel\\iCLS Client\\"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\DAL"
+        - "C:\\Program Files\\Intel\\Intel(R) Management Engine Components\\DAL"
+        - "C:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\IPT"
+        - "C:\\Program Files\\Intel\\Intel(R) Management Engine Components\\IPT"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Users\\rahat\\AppData\\Roaming\\npm"
+        - "C:\\Program Files\\Microsoft SQL Server\\120\\Tools\\Binn\\"
+        - "D:\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\CMake\\bin"
+        - "C:\\Users\\rahat\\AppData\\Local\\Android\\Sdk\\platform-tools"
+        - "C:\\Users\\rahat\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\"
+        - "C:\\Users\\rahat\\AppData\\Local\\Programs\\Python\\Python313\\"
+        - "C:\\Users\\rahat\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\rahat\\AppData\\Roaming\\npm"
+        - "C:\\Users\\rahat\\AppData\\Local\\Pandoc\\"
+        - "D:\\software\\Antigravity\\bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:37 (find_program)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:65 (__resolve_tool_path)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:104 (__resolve_linker_path)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "_CMAKE_TOOL_WITH_PATH"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "lld-link"
+    candidate_directories:
+      - "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x86/"
+      - "C:/Program Files (x86)/Intel/iCLS Client/"
+      - "C:/Program Files/Intel/iCLS Client/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL/"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/DAL/"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/IPT/"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/IPT/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Users/rahat/AppData/Roaming/npm/"
+      - "C:/Program Files/Microsoft SQL Server/120/Tools/Binn/"
+      - "D:/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/CMake/bin/"
+      - "C:/Users/rahat/AppData/Local/Android/Sdk/platform-tools/"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/Scripts/"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/"
+      - "C:/Users/rahat/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/rahat/AppData/Local/Pandoc/"
+      - "D:/software/Antigravity/bin/"
+    searched_directories:
+      - "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x86/lld-link.com"
+      - "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x86/lld-link.exe"
+      - "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x86/lld-link"
+      - "C:/Program Files (x86)/Intel/iCLS Client/lld-link.com"
+      - "C:/Program Files (x86)/Intel/iCLS Client/lld-link.exe"
+      - "C:/Program Files (x86)/Intel/iCLS Client/lld-link"
+      - "C:/Program Files/Intel/iCLS Client/lld-link.com"
+      - "C:/Program Files/Intel/iCLS Client/lld-link.exe"
+      - "C:/Program Files/Intel/iCLS Client/lld-link"
+      - "C:/Windows/System32/lld-link.com"
+      - "C:/Windows/System32/lld-link.exe"
+      - "C:/Windows/System32/lld-link"
+      - "C:/Windows/lld-link.com"
+      - "C:/Windows/lld-link.exe"
+      - "C:/Windows/lld-link"
+      - "C:/Windows/System32/wbem/lld-link.com"
+      - "C:/Windows/System32/wbem/lld-link.exe"
+      - "C:/Windows/System32/wbem/lld-link"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL/lld-link.com"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL/lld-link.exe"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL/lld-link"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/DAL/lld-link.com"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/DAL/lld-link.exe"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/DAL/lld-link"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/IPT/lld-link.com"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/IPT/lld-link.exe"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/IPT/lld-link"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/IPT/lld-link.com"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/IPT/lld-link.exe"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/IPT/lld-link"
+      - "C:/Windows/System32/OpenSSH/lld-link.com"
+      - "C:/Windows/System32/OpenSSH/lld-link.exe"
+      - "C:/Windows/System32/OpenSSH/lld-link"
+      - "C:/Program Files/Git/cmd/lld-link.com"
+      - "C:/Program Files/Git/cmd/lld-link.exe"
+      - "C:/Program Files/Git/cmd/lld-link"
+      - "C:/Program Files/nodejs/lld-link.com"
+      - "C:/Program Files/nodejs/lld-link.exe"
+      - "C:/Program Files/nodejs/lld-link"
+      - "C:/Users/rahat/AppData/Roaming/npm/lld-link.com"
+      - "C:/Users/rahat/AppData/Roaming/npm/lld-link.exe"
+      - "C:/Users/rahat/AppData/Roaming/npm/lld-link"
+      - "C:/Program Files/Microsoft SQL Server/120/Tools/Binn/lld-link.com"
+      - "C:/Program Files/Microsoft SQL Server/120/Tools/Binn/lld-link.exe"
+      - "C:/Program Files/Microsoft SQL Server/120/Tools/Binn/lld-link"
+      - "D:/Windows Kits/10/Windows Performance Toolkit/lld-link.com"
+      - "D:/Windows Kits/10/Windows Performance Toolkit/lld-link.exe"
+      - "D:/Windows Kits/10/Windows Performance Toolkit/lld-link"
+      - "C:/Program Files/CMake/bin/lld-link.com"
+      - "C:/Program Files/CMake/bin/lld-link.exe"
+      - "C:/Program Files/CMake/bin/lld-link"
+      - "C:/Users/rahat/AppData/Local/Android/Sdk/platform-tools/lld-link.com"
+      - "C:/Users/rahat/AppData/Local/Android/Sdk/platform-tools/lld-link.exe"
+      - "C:/Users/rahat/AppData/Local/Android/Sdk/platform-tools/lld-link"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/Scripts/lld-link.com"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/Scripts/lld-link.exe"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/Scripts/lld-link"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/lld-link.com"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/lld-link.exe"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/lld-link"
+      - "C:/Users/rahat/AppData/Local/Microsoft/WindowsApps/lld-link.com"
+      - "C:/Users/rahat/AppData/Local/Microsoft/WindowsApps/lld-link.exe"
+      - "C:/Users/rahat/AppData/Local/Microsoft/WindowsApps/lld-link"
+      - "C:/Users/rahat/AppData/Local/Pandoc/lld-link.com"
+      - "C:/Users/rahat/AppData/Local/Pandoc/lld-link.exe"
+      - "C:/Users/rahat/AppData/Local/Pandoc/lld-link"
+      - "D:/software/Antigravity/bin/lld-link.com"
+      - "D:/software/Antigravity/bin/lld-link.exe"
+      - "D:/software/Antigravity/bin/lld-link"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "C:\\Program Files (x86)\\Intel\\iCLS Client\\"
+        - "C:\\Program Files\\Intel\\iCLS Client\\"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\DAL"
+        - "C:\\Program Files\\Intel\\Intel(R) Management Engine Components\\DAL"
+        - "C:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\IPT"
+        - "C:\\Program Files\\Intel\\Intel(R) Management Engine Components\\IPT"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Users\\rahat\\AppData\\Roaming\\npm"
+        - "C:\\Program Files\\Microsoft SQL Server\\120\\Tools\\Binn\\"
+        - "D:\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\CMake\\bin"
+        - "C:\\Users\\rahat\\AppData\\Local\\Android\\Sdk\\platform-tools"
+        - "C:\\Users\\rahat\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\"
+        - "C:\\Users\\rahat\\AppData\\Local\\Programs\\Python\\Python313\\"
+        - "C:\\Users\\rahat\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\rahat\\AppData\\Roaming\\npm"
+        - "C:\\Users\\rahat\\AppData\\Local\\Pandoc\\"
+        - "D:\\software\\Antigravity\\bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_LINKER"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "link"
+    candidate_directories:
+      - "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x86/"
+      - "C:/Program Files (x86)/Intel/iCLS Client/"
+      - "C:/Program Files/Intel/iCLS Client/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL/"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/DAL/"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/IPT/"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/IPT/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Users/rahat/AppData/Roaming/npm/"
+      - "C:/Program Files/Microsoft SQL Server/120/Tools/Binn/"
+      - "D:/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/CMake/bin/"
+      - "C:/Users/rahat/AppData/Local/Android/Sdk/platform-tools/"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/Scripts/"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/"
+      - "C:/Users/rahat/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/rahat/AppData/Local/Pandoc/"
+      - "D:/software/Antigravity/bin/"
+    searched_directories:
+      - "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x86/link.com"
+    found: "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x86/link.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\Program Files (x86)\\Intel\\iCLS Client\\"
+        - "C:\\Program Files\\Intel\\iCLS Client\\"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\DAL"
+        - "C:\\Program Files\\Intel\\Intel(R) Management Engine Components\\DAL"
+        - "C:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\IPT"
+        - "C:\\Program Files\\Intel\\Intel(R) Management Engine Components\\IPT"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Users\\rahat\\AppData\\Roaming\\npm"
+        - "C:\\Program Files\\Microsoft SQL Server\\120\\Tools\\Binn\\"
+        - "D:\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\CMake\\bin"
+        - "C:\\Users\\rahat\\AppData\\Local\\Android\\Sdk\\platform-tools"
+        - "C:\\Users\\rahat\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\"
+        - "C:\\Users\\rahat\\AppData\\Local\\Programs\\Python\\Python313\\"
+        - "C:\\Users\\rahat\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\rahat\\AppData\\Roaming\\npm"
+        - "C:\\Users\\rahat\\AppData\\Local\\Pandoc\\"
+        - "D:\\software\\Antigravity\\bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_MT"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "mt"
+    candidate_directories:
+      - "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x86/"
+      - "C:/Program Files (x86)/Intel/iCLS Client/"
+      - "C:/Program Files/Intel/iCLS Client/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL/"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/DAL/"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/IPT/"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/IPT/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Users/rahat/AppData/Roaming/npm/"
+      - "C:/Program Files/Microsoft SQL Server/120/Tools/Binn/"
+      - "D:/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/CMake/bin/"
+      - "C:/Users/rahat/AppData/Local/Android/Sdk/platform-tools/"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/Scripts/"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/"
+      - "C:/Users/rahat/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/rahat/AppData/Local/Pandoc/"
+      - "D:/software/Antigravity/bin/"
+    searched_directories:
+      - "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x86/mt.com"
+      - "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x86/mt.exe"
+      - "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x86/mt"
+      - "C:/Program Files (x86)/Intel/iCLS Client/mt.com"
+      - "C:/Program Files (x86)/Intel/iCLS Client/mt.exe"
+      - "C:/Program Files (x86)/Intel/iCLS Client/mt"
+      - "C:/Program Files/Intel/iCLS Client/mt.com"
+      - "C:/Program Files/Intel/iCLS Client/mt.exe"
+      - "C:/Program Files/Intel/iCLS Client/mt"
+      - "C:/Windows/System32/mt.com"
+      - "C:/Windows/System32/mt.exe"
+      - "C:/Windows/System32/mt"
+      - "C:/Windows/mt.com"
+      - "C:/Windows/mt.exe"
+      - "C:/Windows/mt"
+      - "C:/Windows/System32/wbem/mt.com"
+      - "C:/Windows/System32/wbem/mt.exe"
+      - "C:/Windows/System32/wbem/mt"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/mt.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/mt.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/mt"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL/mt.com"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL/mt.exe"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL/mt"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/DAL/mt.com"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/DAL/mt.exe"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/DAL/mt"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/IPT/mt.com"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/IPT/mt.exe"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/IPT/mt"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/IPT/mt.com"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/IPT/mt.exe"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/IPT/mt"
+      - "C:/Windows/System32/OpenSSH/mt.com"
+      - "C:/Windows/System32/OpenSSH/mt.exe"
+      - "C:/Windows/System32/OpenSSH/mt"
+      - "C:/Program Files/Git/cmd/mt.com"
+      - "C:/Program Files/Git/cmd/mt.exe"
+      - "C:/Program Files/Git/cmd/mt"
+      - "C:/Program Files/nodejs/mt.com"
+      - "C:/Program Files/nodejs/mt.exe"
+      - "C:/Program Files/nodejs/mt"
+      - "C:/Users/rahat/AppData/Roaming/npm/mt.com"
+      - "C:/Users/rahat/AppData/Roaming/npm/mt.exe"
+      - "C:/Users/rahat/AppData/Roaming/npm/mt"
+      - "C:/Program Files/Microsoft SQL Server/120/Tools/Binn/mt.com"
+      - "C:/Program Files/Microsoft SQL Server/120/Tools/Binn/mt.exe"
+      - "C:/Program Files/Microsoft SQL Server/120/Tools/Binn/mt"
+      - "D:/Windows Kits/10/Windows Performance Toolkit/mt.com"
+      - "D:/Windows Kits/10/Windows Performance Toolkit/mt.exe"
+      - "D:/Windows Kits/10/Windows Performance Toolkit/mt"
+      - "C:/Program Files/CMake/bin/mt.com"
+      - "C:/Program Files/CMake/bin/mt.exe"
+      - "C:/Program Files/CMake/bin/mt"
+      - "C:/Users/rahat/AppData/Local/Android/Sdk/platform-tools/mt.com"
+      - "C:/Users/rahat/AppData/Local/Android/Sdk/platform-tools/mt.exe"
+      - "C:/Users/rahat/AppData/Local/Android/Sdk/platform-tools/mt"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/Scripts/mt.com"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/Scripts/mt.exe"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/Scripts/mt"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/mt.com"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/mt.exe"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/mt"
+      - "C:/Users/rahat/AppData/Local/Microsoft/WindowsApps/mt.com"
+      - "C:/Users/rahat/AppData/Local/Microsoft/WindowsApps/mt.exe"
+      - "C:/Users/rahat/AppData/Local/Microsoft/WindowsApps/mt"
+      - "C:/Users/rahat/AppData/Local/Pandoc/mt.com"
+      - "C:/Users/rahat/AppData/Local/Pandoc/mt.exe"
+      - "C:/Users/rahat/AppData/Local/Pandoc/mt"
+      - "D:/software/Antigravity/bin/mt.com"
+      - "D:/software/Antigravity/bin/mt.exe"
+      - "D:/software/Antigravity/bin/mt"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "C:\\Program Files (x86)\\Intel\\iCLS Client\\"
+        - "C:\\Program Files\\Intel\\iCLS Client\\"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\DAL"
+        - "C:\\Program Files\\Intel\\Intel(R) Management Engine Components\\DAL"
+        - "C:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\IPT"
+        - "C:\\Program Files\\Intel\\Intel(R) Management Engine Components\\IPT"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Users\\rahat\\AppData\\Roaming\\npm"
+        - "C:\\Program Files\\Microsoft SQL Server\\120\\Tools\\Binn\\"
+        - "D:\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\CMake\\bin"
+        - "C:\\Users\\rahat\\AppData\\Local\\Android\\Sdk\\platform-tools"
+        - "C:\\Users\\rahat\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\"
+        - "C:\\Users\\rahat\\AppData\\Local\\Programs\\Python\\Python313\\"
+        - "C:\\Users\\rahat\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\rahat\\AppData\\Roaming\\npm"
+        - "C:\\Users\\rahat\\AppData\\Local\\Pandoc\\"
+        - "D:\\software\\Antigravity\\bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_AR"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "lib"
+    candidate_directories:
+      - "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x86/"
+      - "C:/Program Files (x86)/Intel/iCLS Client/"
+      - "C:/Program Files/Intel/iCLS Client/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL/"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/DAL/"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/IPT/"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/IPT/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Users/rahat/AppData/Roaming/npm/"
+      - "C:/Program Files/Microsoft SQL Server/120/Tools/Binn/"
+      - "D:/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/CMake/bin/"
+      - "C:/Users/rahat/AppData/Local/Android/Sdk/platform-tools/"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/Scripts/"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/"
+      - "C:/Users/rahat/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/rahat/AppData/Local/Pandoc/"
+      - "D:/software/Antigravity/bin/"
+    searched_directories:
+      - "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x86/lib.com"
+    found: "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x86/lib.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\Program Files (x86)\\Intel\\iCLS Client\\"
+        - "C:\\Program Files\\Intel\\iCLS Client\\"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\DAL"
+        - "C:\\Program Files\\Intel\\Intel(R) Management Engine Components\\DAL"
+        - "C:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\IPT"
+        - "C:\\Program Files\\Intel\\Intel(R) Management Engine Components\\IPT"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Users\\rahat\\AppData\\Roaming\\npm"
+        - "C:\\Program Files\\Microsoft SQL Server\\120\\Tools\\Binn\\"
+        - "D:\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\CMake\\bin"
+        - "C:\\Users\\rahat\\AppData\\Local\\Android\\Sdk\\platform-tools"
+        - "C:\\Users\\rahat\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\"
+        - "C:\\Users\\rahat\\AppData\\Local\\Programs\\Python\\Python313\\"
+        - "C:\\Users\\rahat\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\rahat\\AppData\\Roaming\\npm"
+        - "C:\\Users\\rahat\\AppData\\Local\\Pandoc\\"
+        - "D:\\software\\Antigravity\\bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineRCCompiler.cmake:40 (find_program)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/Platform/Windows-MSVC.cmake:583 (enable_language)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/Platform/Windows-MSVC.cmake:556 (__windows_compiler_msvc_enable_rc)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/Platform/Windows-MSVC-CXX.cmake:6 (__windows_compiler_msvc)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeCXXInformation.cmake:48 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_RC_COMPILER"
+    description: "RC compiler"
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "rc"
+    candidate_directories:
+      - "C:/Program Files (x86)/Intel/iCLS Client/"
+      - "C:/Program Files/Intel/iCLS Client/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL/"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/DAL/"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/IPT/"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/IPT/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Users/rahat/AppData/Roaming/npm/"
+      - "C:/Program Files/Microsoft SQL Server/120/Tools/Binn/"
+      - "D:/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/CMake/bin/"
+      - "C:/Users/rahat/AppData/Local/Android/Sdk/platform-tools/"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/Scripts/"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/"
+      - "C:/Users/rahat/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/rahat/AppData/Local/Pandoc/"
+      - "D:/software/Antigravity/bin/"
+      - "C:/Program Files/bin/"
+      - "C:/Program Files/sbin/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/bin/"
+      - "C:/Program Files (x86)/sbin/"
+      - "C:/Program Files (x86)/"
+      - "C:/Program Files/CMake/bin/"
+      - "C:/Program Files/CMake/sbin/"
+      - "C:/Program Files/CMake/"
+      - "C:/Program Files (x86)/BDShare_DSE/bin/"
+      - "C:/Program Files (x86)/BDShare_DSE/sbin/"
+      - "C:/Program Files (x86)/BDShare_DSE/"
+    searched_directories:
+      - "C:/Program Files (x86)/Intel/iCLS Client/rc.com"
+      - "C:/Program Files (x86)/Intel/iCLS Client/rc.exe"
+      - "C:/Program Files (x86)/Intel/iCLS Client/rc"
+      - "C:/Program Files/Intel/iCLS Client/rc.com"
+      - "C:/Program Files/Intel/iCLS Client/rc.exe"
+      - "C:/Program Files/Intel/iCLS Client/rc"
+      - "C:/Windows/System32/rc.com"
+      - "C:/Windows/System32/rc.exe"
+      - "C:/Windows/System32/rc"
+      - "C:/Windows/rc.com"
+      - "C:/Windows/rc.exe"
+      - "C:/Windows/rc"
+      - "C:/Windows/System32/wbem/rc.com"
+      - "C:/Windows/System32/wbem/rc.exe"
+      - "C:/Windows/System32/wbem/rc"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/rc.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/rc.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/rc"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL/rc.com"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL/rc.exe"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL/rc"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/DAL/rc.com"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/DAL/rc.exe"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/DAL/rc"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/IPT/rc.com"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/IPT/rc.exe"
+      - "C:/Program Files (x86)/Intel/Intel(R) Management Engine Components/IPT/rc"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/IPT/rc.com"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/IPT/rc.exe"
+      - "C:/Program Files/Intel/Intel(R) Management Engine Components/IPT/rc"
+      - "C:/Windows/System32/OpenSSH/rc.com"
+      - "C:/Windows/System32/OpenSSH/rc.exe"
+      - "C:/Windows/System32/OpenSSH/rc"
+      - "C:/Program Files/Git/cmd/rc.com"
+      - "C:/Program Files/Git/cmd/rc.exe"
+      - "C:/Program Files/Git/cmd/rc"
+      - "C:/Program Files/nodejs/rc.com"
+      - "C:/Program Files/nodejs/rc.exe"
+      - "C:/Program Files/nodejs/rc"
+      - "C:/Users/rahat/AppData/Roaming/npm/rc.com"
+      - "C:/Users/rahat/AppData/Roaming/npm/rc.exe"
+      - "C:/Users/rahat/AppData/Roaming/npm/rc"
+      - "C:/Program Files/Microsoft SQL Server/120/Tools/Binn/rc.com"
+      - "C:/Program Files/Microsoft SQL Server/120/Tools/Binn/rc.exe"
+      - "C:/Program Files/Microsoft SQL Server/120/Tools/Binn/rc"
+      - "D:/Windows Kits/10/Windows Performance Toolkit/rc.com"
+      - "D:/Windows Kits/10/Windows Performance Toolkit/rc.exe"
+      - "D:/Windows Kits/10/Windows Performance Toolkit/rc"
+      - "C:/Program Files/CMake/bin/rc.com"
+      - "C:/Program Files/CMake/bin/rc.exe"
+      - "C:/Program Files/CMake/bin/rc"
+      - "C:/Users/rahat/AppData/Local/Android/Sdk/platform-tools/rc.com"
+      - "C:/Users/rahat/AppData/Local/Android/Sdk/platform-tools/rc.exe"
+      - "C:/Users/rahat/AppData/Local/Android/Sdk/platform-tools/rc"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/Scripts/rc.com"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/Scripts/rc.exe"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/Scripts/rc"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/rc.com"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/rc.exe"
+      - "C:/Users/rahat/AppData/Local/Programs/Python/Python313/rc"
+      - "C:/Users/rahat/AppData/Local/Microsoft/WindowsApps/rc.com"
+      - "C:/Users/rahat/AppData/Local/Microsoft/WindowsApps/rc.exe"
+      - "C:/Users/rahat/AppData/Local/Microsoft/WindowsApps/rc"
+      - "C:/Users/rahat/AppData/Local/Pandoc/rc.com"
+      - "C:/Users/rahat/AppData/Local/Pandoc/rc.exe"
+      - "C:/Users/rahat/AppData/Local/Pandoc/rc"
+      - "D:/software/Antigravity/bin/rc.com"
+      - "D:/software/Antigravity/bin/rc.exe"
+      - "D:/software/Antigravity/bin/rc"
+      - "C:/Program Files/bin/rc.com"
+      - "C:/Program Files/bin/rc.exe"
+      - "C:/Program Files/bin/rc"
+      - "C:/Program Files/sbin/rc.com"
+      - "C:/Program Files/sbin/rc.exe"
+      - "C:/Program Files/sbin/rc"
+      - "C:/Program Files/rc.com"
+      - "C:/Program Files/rc.exe"
+      - "C:/Program Files/rc"
+      - "C:/Program Files (x86)/bin/rc.com"
+      - "C:/Program Files (x86)/bin/rc.exe"
+      - "C:/Program Files (x86)/bin/rc"
+      - "C:/Program Files (x86)/sbin/rc.com"
+      - "C:/Program Files (x86)/sbin/rc.exe"
+      - "C:/Program Files (x86)/sbin/rc"
+      - "C:/Program Files (x86)/rc.com"
+      - "C:/Program Files (x86)/rc.exe"
+      - "C:/Program Files (x86)/rc"
+      - "C:/Program Files/CMake/bin/rc.com"
+      - "C:/Program Files/CMake/bin/rc.exe"
+      - "C:/Program Files/CMake/bin/rc"
+      - "C:/Program Files/CMake/sbin/rc.com"
+      - "C:/Program Files/CMake/sbin/rc.exe"
+      - "C:/Program Files/CMake/sbin/rc"
+      - "C:/Program Files/CMake/rc.com"
+      - "C:/Program Files/CMake/rc.exe"
+      - "C:/Program Files/CMake/rc"
+      - "C:/Program Files (x86)/BDShare_DSE/bin/rc.com"
+      - "C:/Program Files (x86)/BDShare_DSE/bin/rc.exe"
+      - "C:/Program Files (x86)/BDShare_DSE/bin/rc"
+      - "C:/Program Files (x86)/BDShare_DSE/sbin/rc.com"
+      - "C:/Program Files (x86)/BDShare_DSE/sbin/rc.exe"
+      - "C:/Program Files (x86)/BDShare_DSE/sbin/rc"
+      - "C:/Program Files (x86)/BDShare_DSE/rc.com"
+      - "C:/Program Files (x86)/BDShare_DSE/rc.exe"
+      - "C:/Program Files (x86)/BDShare_DSE/rc"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "C:\\Program Files (x86)\\Intel\\iCLS Client\\"
+        - "C:\\Program Files\\Intel\\iCLS Client\\"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\DAL"
+        - "C:\\Program Files\\Intel\\Intel(R) Management Engine Components\\DAL"
+        - "C:\\Program Files (x86)\\Intel\\Intel(R) Management Engine Components\\IPT"
+        - "C:\\Program Files\\Intel\\Intel(R) Management Engine Components\\IPT"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Users\\rahat\\AppData\\Roaming\\npm"
+        - "C:\\Program Files\\Microsoft SQL Server\\120\\Tools\\Binn\\"
+        - "D:\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\CMake\\bin"
+        - "C:\\Users\\rahat\\AppData\\Local\\Android\\Sdk\\platform-tools"
+        - "C:\\Users\\rahat\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\"
+        - "C:\\Users\\rahat\\AppData\\Local\\Programs\\Python\\Python313\\"
+        - "C:\\Users\\rahat\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\rahat\\AppData\\Roaming\\npm"
+        - "C:\\Users\\rahat\\AppData\\Local\\Pandoc\\"
+        - "D:\\software\\Antigravity\\bin"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files (x86)/BDShare_DSE"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "C:/Program Files/CMake"
+        - "C:/Program Files (x86)/BDShare_DSE"
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "D:/software/bdshare-amibroker-plugin/build32/CMakeFiles/CMakeScratch/TryCompile-3xzwr7"
+      binary: "D:/software/bdshare-amibroker-plugin/build32/CMakeFiles/CMakeScratch/TryCompile-3xzwr7"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /GR /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_CXX_SCAN_FOR_MODULES: "OFF"
+      CMAKE_CXX_STDLIB_MODULES_JSON: ""
+      CMAKE_EXE_LINKER_FLAGS: "/machine:X86"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/software/bdshare-amibroker-plugin/build32/CMakeFiles/CMakeScratch/TryCompile-3xzwr7'
+        
+        Run Build Command(s): "D:/software/Visual studio/Insiders/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_fe9e8.vcxproj /p:Configuration=Debug /p:Platform=Win32 /p:VisualStudioVersion=18.0 /v:n
+        MSBuild version 18.4.0+6e61e96ac for .NET Framework
+        Build started 22/02/2026 3:53:07 PM.
+        
+        Project "D:\\software\\bdshare-amibroker-plugin\\build32\\CMakeFiles\\CMakeScratch\\TryCompile-3xzwr7\\cmTC_fe9e8.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "D:\\software\\bdshare-amibroker-plugin\\build32\\CMakeFiles\\CMakeScratch\\TryCompile-3xzwr7\\Debug\\".
+          Creating directory "cmTC_fe9e8.dir\\Debug\\cmTC_fe9e8.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_fe9e8.dir\\Debug\\cmTC_fe9e8.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_fe9e8.dir\\Debug\\cmTC_fe9e8.tlog\\unsuccessfulbuild".
+        ClCompile:
+          D:\\software\\Visual studio\\Insiders\\VC\\Tools\\MSVC\\14.50.35717\\bin\\HostX64\\x86\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /Oy- /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GR /Fo"cmTC_fe9e8.dir\\Debug\\\\" /Fd"cmTC_fe9e8.dir\\Debug\\vc145.pdb" /external:W1 /TP /analyze- /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.3\\Modules\\CMakeCXXCompilerABI.cpp"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.50.35724 for x86
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /Oy- /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GR /Fo"cmTC_fe9e8.dir\\Debug\\\\" /Fd"cmTC_fe9e8.dir\\Debug\\vc145.pdb" /external:W1 /TP /analyze- /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.3\\Modules\\CMakeCXXCompilerABI.cpp"
+          CMakeCXXCompilerABI.cpp
+        Link:
+          D:\\software\\Visual studio\\Insiders\\VC\\Tools\\MSVC\\14.50.35717\\bin\\HostX64\\x86\\link.exe /OUT:"D:\\software\\bdshare-amibroker-plugin\\build32\\CMakeFiles\\CMakeScratch\\TryCompile-3xzwr7\\Debug\\cmTC_fe9e8.exe" /INCREMENTAL /ILK:"cmTC_fe9e8.dir\\Debug\\cmTC_fe9e8.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/software/bdshare-amibroker-plugin/build32/CMakeFiles/CMakeScratch/TryCompile-3xzwr7/Debug/cmTC_fe9e8.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"D:/software/bdshare-amibroker-plugin/build32/CMakeFiles/CMakeScratch/TryCompile-3xzwr7/Debug/cmTC_fe9e8.lib" /MACHINE:X86  /machine:X86 cmTC_fe9e8.dir\\Debug\\CMakeCXXCompilerABI.obj
+          cmTC_fe9e8.vcxproj -> D:\\software\\bdshare-amibroker-plugin\\build32\\CMakeFiles\\CMakeScratch\\TryCompile-3xzwr7\\Debug\\cmTC_fe9e8.exe
+        FinalizeBuildStatus:
+          Deleting file "cmTC_fe9e8.dir\\Debug\\cmTC_fe9e8.tlog\\unsuccessfulbuild".
+          Touching "cmTC_fe9e8.dir\\Debug\\cmTC_fe9e8.tlog\\cmTC_fe9e8.lastbuildstate".
+        Done Building Project "D:\\software\\bdshare-amibroker-plugin\\build32\\CMakeFiles\\CMakeScratch\\TryCompile-3xzwr7\\cmTC_fe9e8.vcxproj" (default targets).
+        
+        Build succeeded.
+            0 Warning(s)
+            0 Error(s)
+        
+        Time Elapsed 00:00:04.39
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:253 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|"|[0-9]+>[ 	-]*Build:[ 	0-9]+ ms[ 	]*)?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'CXX': D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/HostX64/x86/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/Internal/CMakeDetermineLinkerId.cmake:38 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:299 (cmake_determine_linker_id)"
+      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Running the CXX compiler's linker: "D:/software/Visual studio/Insiders/VC/Tools/MSVC/14.50.35717/bin/HostX64/x86/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.50.35724.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+...
