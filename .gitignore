@@ -416,3 +416,8 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Visual Studio Code workspace storage files
+**/.vscode-test/
+build32/
+build64/
