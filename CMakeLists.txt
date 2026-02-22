@@ -32,7 +32,6 @@ if(MSVC)
         /WX-        # don't treat warnings as errors (ADK headers have some)
         /MP         # multi-processor compilation
         /EHsc       # standard C++ exception handling
-        /DUNICODE /D_UNICODE
     )
 
     # Produce both 32-bit (x86) and 64-bit builds depending on the selected
