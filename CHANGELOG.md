@@ -5,7 +5,7 @@ All notable changes to the **BDShare DSE AmiBroker plugin** are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.2.0] - Unreleased
+## [1.2.0] - 20261107
 
 DSE retired the pages this plugin read: `www.dsebd.org` and `dsebd.org` now answer `410 Gone`, so version 1.1.2 receives no data. This release restores the feed and fixes problems found along the way, following what the [bdshare](https://github.com/rochi88/bdshare) Python package learned about the DSE site.
 
