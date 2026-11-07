@@ -1,563 +1,239 @@
 // ============================================================================
 // DSEFetcher.cpp
-// WinHTTP-based fetcher: all network I/O and HTML table parsing lives here.
-// No external dependencies beyond Windows SDK.
+// WinHTTP transport for the legacy DSE site. Parsing lives in DSEParsers.cpp.
 // ============================================================================
 
 #include "DSEFetcher.h"
-#include <algorithm>
-#include <cctype>
-#include <sstream>
 
-// ---------------------------------------------------------------------------
-// Construction / destruction
-// ---------------------------------------------------------------------------
+namespace {
 
-DSEFetcher::DSEFetcher() : m_hSession(nullptr) {}
+const wchar_t kHost[] = L"old.dsebd.org";
+// Identify the plugin honestly; see the note in DSEFetcher.h.
+const wchar_t kUserAgent[] =
+    L"BDShare-AmiBroker/" BDSHARE_VERSION_WSTRING
+    L" (+https://github.com/rochi88/bdshare-amibroker-plugin)";
 
-DSEFetcher::~DSEFetcher() { Shutdown(); }
+const int kAttempts = 3;
+const DWORD kBaseBackoffMs = 200; // doubled on each retry
+
+thread_local std::string t_lastError;
+
+} // namespace
+
+std::string DSEFetcher::LastError() { return t_lastError; }
 
 bool DSEFetcher::Init() {
-  m_hSession = WinHttpOpen(L"Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-                           WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+  if (m_hConnect)
+    return true;
+  m_hSession = WinHttpOpen(kUserAgent, WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
                            WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
   if (!m_hSession) {
-    m_lastError = "WinHttpOpen failed";
+    t_lastError = "WinHttpOpen failed";
     return false;
   }
-  // Set sensible timeouts (ms): resolve, connect, send, receive
+  // Resolve, connect, send, receive (ms). A stalled request is retried rather
+  // than waited out, since AmiBroker may be waiting on it.
   WinHttpSetTimeouts(m_hSession, 10000, 10000, 15000, 15000);
+
+  // Windows 7 does not enable TLS 1.2 by default. Failure here only means the
+  // system default applies.
+  DWORD protocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
+  WinHttpSetOption(m_hSession, WINHTTP_OPTION_SECURE_PROTOCOLS, &protocols,
+                   sizeof(protocols));
+#ifdef WINHTTP_OPTION_DECOMPRESSION
+  // The price page is about 550 KB raw and 53 KB compressed. Older Windows
+  // rejects this option and simply receives the uncompressed page.
+  DWORD decompression = WINHTTP_DECOMPRESSION_FLAG_ALL;
+  WinHttpSetOption(m_hSession, WINHTTP_OPTION_DECOMPRESSION, &decompression,
+                   sizeof(decompression));
+#endif
+
+  m_hConnect =
+      WinHttpConnect(m_hSession, kHost, INTERNET_DEFAULT_HTTPS_PORT, 0);
+  if (!m_hConnect) {
+    t_lastError = "WinHttpConnect failed";
+    Shutdown();
+    return false;
+  }
   return true;
 }
 
 void DSEFetcher::Shutdown() {
+  if (m_hConnect) {
+    WinHttpCloseHandle(m_hConnect);
+    m_hConnect = nullptr;
+  }
   if (m_hSession) {
     WinHttpCloseHandle(m_hSession);
     m_hSession = nullptr;
   }
 }
 
-// ---------------------------------------------------------------------------
-// HTTP GET
-// ---------------------------------------------------------------------------
-bool DSEFetcher::HttpGet(const std::wstring &host, const std::wstring &path,
-                         const std::wstring &query, std::string &body) {
-  body.clear();
+bool DSEFetcher::RequestOnce(const wchar_t *verb, const std::wstring &path,
+                             const wchar_t *headers,
+                             const std::string &postBody,
+                             std::string &responseBody, bool &retryable) {
+  responseBody.clear();
+  retryable = true;
 
-  HINTERNET hConn =
-      WinHttpConnect(m_hSession, host.c_str(), INTERNET_DEFAULT_HTTPS_PORT, 0);
-  if (!hConn) {
-    m_lastError = "Connect failed";
-    return false;
-  }
-
-  std::wstring fullPath = path + (query.empty() ? L"" : L"?" + query);
   HINTERNET hReq = WinHttpOpenRequest(
-      hConn, L"GET", fullPath.c_str(), nullptr, WINHTTP_NO_REFERER,
+      m_hConnect, verb, path.c_str(), nullptr, WINHTTP_NO_REFERER,
       WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_SECURE);
   if (!hReq) {
-    WinHttpCloseHandle(hConn);
-    m_lastError = "OpenRequest failed";
+    t_lastError = "WinHttpOpenRequest failed";
     return false;
   }
 
   bool ok = false;
-  if (WinHttpSendRequest(hReq, WINHTTP_NO_ADDITIONAL_HEADERS, 0,
-                         WINHTTP_NO_REQUEST_DATA, 0, 0, 0) &&
+  LPVOID data = postBody.empty() ? WINHTTP_NO_REQUEST_DATA
+                                 : const_cast<char *>(postBody.data());
+  const DWORD dataLen = static_cast<DWORD>(postBody.size());
+  if (WinHttpSendRequest(hReq, headers ? headers : WINHTTP_NO_ADDITIONAL_HEADERS,
+                         headers ? static_cast<DWORD>(-1L) : 0, data, dataLen,
+                         dataLen, 0) &&
       WinHttpReceiveResponse(hReq, nullptr)) {
-    DWORD statusCode = 0;
-    DWORD sz = sizeof(DWORD);
+    DWORD status = 0, statusSize = sizeof(status);
     WinHttpQueryHeaders(hReq,
                         WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
-                        nullptr, &statusCode, &sz, nullptr);
-
-    if (statusCode == 200) {
-      DWORD bytesAvail = 0;
-      while (WinHttpQueryDataAvailable(hReq, &bytesAvail) && bytesAvail > 0) {
-        std::vector<char> buf(bytesAvail + 1, 0);
-        DWORD bytesRead = 0;
-        WinHttpReadData(hReq, buf.data(), bytesAvail, &bytesRead);
-        body.append(buf.data(), bytesRead);
-      }
+                        WINHTTP_HEADER_NAME_BY_INDEX, &status, &statusSize,
+                        WINHTTP_NO_HEADER_INDEX);
+    if (status == 200) {
       ok = true;
+      DWORD avail = 0;
+      while (true) {
+        if (!WinHttpQueryDataAvailable(hReq, &avail)) {
+          t_lastError = "Connection lost while reading the response";
+          ok = false;
+          break;
+        }
+        if (avail == 0)
+          break;
+        const size_t offset = responseBody.size();
+        responseBody.resize(offset + avail);
+        DWORD read = 0;
+        if (!WinHttpReadData(hReq, &responseBody[offset], avail, &read)) {
+          t_lastError = "Connection lost while reading the response";
+          ok = false;
+          break;
+        }
+        responseBody.resize(offset + read);
+      }
     } else {
-      m_lastError = "HTTP " + std::to_string(statusCode);
+      t_lastError = "HTTP " + std::to_string(status);
+      // A 4xx answer will not change on an immediate retry.
+      retryable = status < 400 || status >= 500;
     }
   } else {
-    m_lastError = "SendRequest/ReceiveResponse failed";
-  }
-
-  WinHttpCloseHandle(hReq);
-  WinHttpCloseHandle(hConn);
-  return ok;
-}
-
-// ---------------------------------------------------------------------------
-// HTTP POST
-// ---------------------------------------------------------------------------
-bool DSEFetcher::HttpPost(const std::wstring &host, const std::wstring &path,
-                          const std::string &postBody, std::string &body) {
-  body.clear();
-
-  HINTERNET hConn =
-      WinHttpConnect(m_hSession, host.c_str(), INTERNET_DEFAULT_HTTPS_PORT, 0);
-  if (!hConn) {
-    m_lastError = "Connect failed";
-    return false;
-  }
-
-  HINTERNET hReq = WinHttpOpenRequest(
-      hConn, L"POST", path.c_str(), nullptr, WINHTTP_NO_REFERER,
-      WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_SECURE);
-  if (!hReq) {
-    WinHttpCloseHandle(hConn);
-    m_lastError = "OpenRequest failed";
-    return false;
-  }
-
-  static const wchar_t *headers =
-      L"Content-Type: application/x-www-form-urlencoded\r\n";
-
-  bool ok = false;
-  if (WinHttpSendRequest(hReq, headers, (DWORD)-1L, (LPVOID)postBody.c_str(),
-                         (DWORD)postBody.size(), (DWORD)postBody.size(), 0) &&
-      WinHttpReceiveResponse(hReq, nullptr)) {
-    DWORD statusCode = 0, sz = sizeof(DWORD);
-    WinHttpQueryHeaders(hReq,
-                        WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
-                        nullptr, &statusCode, &sz, nullptr);
-
-    if (statusCode == 200) {
-      DWORD bytesAvail = 0;
-      while (WinHttpQueryDataAvailable(hReq, &bytesAvail) && bytesAvail > 0) {
-        std::vector<char> buf(bytesAvail + 1, 0);
-        DWORD bytesRead = 0;
-        WinHttpReadData(hReq, buf.data(), bytesAvail, &bytesRead);
-        body.append(buf.data(), bytesRead);
-      }
-      ok = true;
+    const DWORD err = GetLastError();
+    if (err == ERROR_WINHTTP_SECURE_FAILURE) {
+      t_lastError = "TLS certificate check failed for old.dsebd.org";
+      retryable = false;
     } else {
-      m_lastError = "HTTP " + std::to_string(statusCode);
+      t_lastError = "Request failed (WinHTTP error " + std::to_string(err) + ")";
     }
   }
 
   WinHttpCloseHandle(hReq);
-  WinHttpCloseHandle(hConn);
   return ok;
 }
 
-// ---------------------------------------------------------------------------
-// String helpers
-// ---------------------------------------------------------------------------
-
-std::string DSEFetcher::Trim(const std::string &s) {
-  size_t start = s.find_first_not_of(" \t\r\n\xC2\xA0");
-  if (start == std::string::npos)
-    return "";
-  size_t end = s.find_last_not_of(" \t\r\n\xC2\xA0");
-  return s.substr(start, end - start + 1);
-}
-
-std::string DSEFetcher::StripTags(const std::string &html) {
-  std::string out;
-  bool inTag = false;
-  for (char c : html) {
-    if (c == '<')
-      inTag = true;
-    else if (c == '>')
-      inTag = false;
-    else if (!inTag)
-      out += c;
+bool DSEFetcher::Request(const wchar_t *verb, const std::string &pathAndQuery,
+                         const wchar_t *headers, const std::string &postBody,
+                         std::string &responseBody) {
+  if (!m_hConnect) {
+    t_lastError = "HTTP client not initialised";
+    return false;
   }
-  return out;
-}
-
-float DSEFetcher::ParseFloat(const std::string &raw) {
-  std::string s;
-  for (char c : raw)
-    if (c != ',')
-      s += c;
-  s = Trim(s);
-  if (s.empty() || s == "-" || s == "N/A")
-    return 0.0f;
-  try {
-    return std::stof(s);
-  } catch (...) {
-    return 0.0f;
-  }
-}
-
-int DSEFetcher::ParseInt(const std::string &raw) {
-  std::string s;
-  for (char c : raw)
-    if (c != ',')
-      s += c;
-  s = Trim(s);
-  if (s.empty() || s == "-")
-    return 0;
-  try {
-    return std::stoi(s);
-  } catch (...) {
-    return 0;
-  }
-}
-
-bool DSEFetcher::SplitDate(const std::string &s, int &y, int &m, int &d) {
-  // Accepts: YYYY-MM-DD  or  DD-MMM-YYYY  or  DD/MM/YYYY
-  if (s.size() >= 10) {
-    if (s[4] == '-') {
-      y = ParseInt(s.substr(0, 4));
-      m = ParseInt(s.substr(5, 2));
-      d = ParseInt(s.substr(8, 2));
-      return y > 1990;
+  // Paths and encoded query strings are ASCII.
+  const std::wstring path(pathAndQuery.begin(), pathAndQuery.end());
+  DWORD backoff = kBaseBackoffMs;
+  for (int attempt = 0; attempt < kAttempts; ++attempt) {
+    if (attempt > 0) {
+      Sleep(backoff);
+      backoff *= 2;
     }
-    if (s[2] == '-' || s[2] == '/') {
-      // Try DD-MM-YYYY
-      d = ParseInt(s.substr(0, 2));
-      m = ParseInt(s.substr(3, 2));
-      y = ParseInt(s.substr(6, 4));
-      return y > 1990;
+    if (m_cancelled) {
+      t_lastError = "Cancelled";
+      return false;
     }
-  }
-  return false;
-}
-
-bool DSEFetcher::ExtractCells(const std::string &row,
-                              std::vector<std::string> &cells) {
-  cells.clear();
-  size_t pos = 0;
-  while (pos < row.size()) {
-    // Find <td ...>
-    size_t tdStart = row.find("<td", pos);
-    if (tdStart == std::string::npos)
-      break;
-    size_t cellOpen = row.find('>', tdStart);
-    if (cellOpen == std::string::npos)
-      break;
-    // Find </td>
-    size_t tdEnd = row.find("</td>", cellOpen);
-    if (tdEnd == std::string::npos)
-      tdEnd = row.find("</TD>", cellOpen);
-    if (tdEnd == std::string::npos)
-      break;
-    std::string cellHtml = row.substr(cellOpen + 1, tdEnd - cellOpen - 1);
-    cells.push_back(Trim(StripTags(cellHtml)));
-    pos = tdEnd + 5;
-  }
-  return !cells.empty();
-}
-
-bool DSEFetcher::FindTableByClass(const std::string &html,
-                                  const std::string &cls,
-                                  std::string &tableHtml) {
-  size_t pos = 0;
-  while (pos < html.size()) {
-    size_t tStart = html.find("<table", pos);
-    if (tStart == std::string::npos)
-      return false;
-    size_t tClose = html.find('>', tStart);
-    if (tClose == std::string::npos)
-      return false;
-    std::string tag = html.substr(tStart, tClose - tStart);
-    if (tag.find(cls) != std::string::npos) {
-      size_t tEnd = html.find("</table>", tClose);
-      if (tEnd == std::string::npos)
-        tEnd = html.find("</TABLE>", tClose);
-      if (tEnd == std::string::npos)
-        return false;
-      tableHtml = html.substr(tStart, tEnd - tStart + 8);
+    bool retryable = true;
+    if (RequestOnce(verb, path, headers, postBody, responseBody, retryable))
       return true;
-    }
-    pos = tClose + 1;
+    if (!retryable)
+      return false;
   }
   return false;
 }
 
-// ---------------------------------------------------------------------------
-// Fetch live data
-// ---------------------------------------------------------------------------
 bool DSEFetcher::FetchLive(std::vector<DSEQuote> &out) {
   std::string html;
-  if (!HttpGet(DSE_HOST, PATH_LIVE, L"", html))
-    if (!HttpGet(DSE_ALT_HOST, PATH_LIVE, L"", html))
-      return false;
-  return ParseLiveTable(html, out);
-}
-
-bool DSEFetcher::ParseLiveTable(const std::string &html,
-                                std::vector<DSEQuote> &out) {
-  out.clear();
-  std::string tableHtml;
-  if (!FindTableByClass(html, "shares-table fixedHeader", tableHtml))
-    if (!FindTableByClass(html, "shares-table", tableHtml))
-      return false;
-
-  size_t pos = 0;
-  bool header = true;
-  SYSTEMTIME st = {};
-  GetLocalTime(&st);
-
-  while (pos < tableHtml.size()) {
-    size_t rowStart = tableHtml.find("<tr", pos);
-    if (rowStart == std::string::npos)
-      break;
-    size_t rowEnd = tableHtml.find("</tr>", rowStart);
-    if (rowEnd == std::string::npos)
-      break;
-    std::string row = tableHtml.substr(rowStart, rowEnd - rowStart + 5);
-    pos = rowEnd + 5;
-
-    if (header) {
-      header = false;
-      continue;
-    }
-
-    std::vector<std::string> cells;
-    if (!ExtractCells(row, cells) || cells.size() < 11)
-      continue;
-
-    DSEQuote q = {};
-    strncpy_s(q.symbol, cells[1].c_str(), 31);
-    q.ltp = ParseFloat(cells[2]);
-    q.high = ParseFloat(cells[3]);
-    q.low = ParseFloat(cells[4]);
-    q.close = ParseFloat(cells[5]);
-    q.open = q.close; // DSE live table doesn't expose open directly
-    q.ycp = ParseFloat(cells[6]);
-    q.change = ParseFloat(cells[7]);
-    q.trade = ParseInt(cells[8]);
-    q.value = ParseFloat(cells[9]);
-    q.volume = ParseFloat(cells[10]);
-    q.year = st.wYear;
-    q.month = st.wMonth;
-    q.day = st.wDay;
-    q.hour = st.wHour;
-    q.minute = st.wMinute;
-    q.second = st.wSecond;
-
-    if (q.symbol[0] != '\0')
-      out.push_back(q);
+  if (!Request(L"GET", "/latest_share_price_scroll_l.php", nullptr, "", html))
+    return false;
+  if (!dse::ParseLiveTable(html, out)) {
+    t_lastError = "Price page layout not recognised";
+    return false;
   }
-  return !out.empty();
+  return true;
 }
 
-// ---------------------------------------------------------------------------
-// Fetch historical data
-// ---------------------------------------------------------------------------
 bool DSEFetcher::FetchHistorical(const std::string &symbol,
                                  const std::string &startDate,
                                  const std::string &endDate,
-                                 std::vector<DSEQuote> &out) {
-  std::string qstr = "startDate=" + startDate + "&endDate=" + endDate +
-                     "&inst=" + symbol + "&archive=data";
-  std::wstring query(qstr.begin(), qstr.end());
-
+                                 std::vector<DSEBar> &out) {
+  const std::string path = "/day_end_archive.php?startDate=" + startDate +
+                           "&endDate=" + endDate +
+                           "&inst=" + dse::UrlEncode(symbol) + "&archive=data";
   std::string html;
-  if (!HttpGet(DSE_HOST, PATH_HIST, query, html)) {
-    if (!HttpGet(DSE_ALT_HOST, PATH_HIST, query, html)) {
-      m_lastError = "GET failed: " + m_lastError;
-      return false;
-    }
+  if (!Request(L"GET", path, nullptr, "", html))
+    return false;
+  if (!dse::ParseDayEndTable(html, out)) {
+    t_lastError = "Archive page layout not recognised";
+    return false;
   }
-  return ParseHistTable(html, out);
+  return true;
 }
 
-bool DSEFetcher::ParseHistTable(const std::string &html,
-                                std::vector<DSEQuote> &out) {
-  out.clear();
-  std::string tableHtml;
-  if (!FindTableByClass(html, "shares-table fixedHeader", tableHtml))
-    if (!FindTableByClass(html, "shares-table", tableHtml))
-      return false;
-
-  size_t pos = 0;
-  bool header = true;
-
-  while (pos < tableHtml.size()) {
-    size_t rowStart = tableHtml.find("<tr", pos);
-    if (rowStart == std::string::npos)
-      break;
-    size_t rowEnd = tableHtml.find("</tr>", rowStart);
-    if (rowEnd == std::string::npos)
-      break;
-    std::string row = tableHtml.substr(rowStart, rowEnd - rowStart + 5);
-    pos = rowEnd + 5;
-
-    if (header) {
-      header = false;
-      continue;
-    }
-
-    std::vector<std::string> cells;
-    if (!ExtractCells(row, cells) || cells.size() < 12)
-      continue;
-
-    // cols: 0=idx 1=date 2=symbol 3=ltp 4=high 5=low 6=open 7=close
-    //       8=ycp 9=trade 10=value 11=volume
-    DSEQuote q = {};
-    int y = 0, m = 0, d = 0;
-    if (!SplitDate(cells[1], y, m, d))
-      continue;
-    strncpy_s(q.symbol, cells[2].c_str(), 31);
-    q.year = y;
-    q.month = m;
-    q.day = d;
-    q.ltp = ParseFloat(cells[3]);
-    q.high = ParseFloat(cells[4]);
-    q.low = ParseFloat(cells[5]);
-    q.open = ParseFloat(cells[6]);
-    q.close = ParseFloat(cells[7]);
-    q.ycp = ParseFloat(cells[8]);
-    q.trade = ParseInt(cells[9]);
-    q.value = ParseFloat(cells[10]);
-    q.volume = ParseFloat(cells[11]);
-
-    if (q.symbol[0] != '\0')
-      out.push_back(q);
-  }
-  return !out.empty();
-}
-
-// ---------------------------------------------------------------------------
-// Fetch market depth
-// ---------------------------------------------------------------------------
 bool DSEFetcher::FetchDepth(const std::string &symbol, DSEDepth &out) {
-  memset(&out, 0, sizeof(out));
-  std::string body = "inst=" + symbol;
+  // The endpoint expects the headers of the site's own AJAX call.
+  static const wchar_t headers[] =
+      L"Content-Type: application/x-www-form-urlencoded\r\n"
+      L"X-Requested-With: XMLHttpRequest\r\n"
+      L"Referer: https://old.dsebd.org/mkt_depth_3.php\r\n";
   std::string html;
-  if (!HttpPost(DSE_HOST, PATH_DEPTH, body, html))
-    if (!HttpPost(DSE_ALT_HOST, PATH_DEPTH, body, html))
-      return false;
-  return ParseDepthTable(html, out);
-}
-
-bool DSEFetcher::ParseDepthTable(const std::string &html, DSEDepth &out) {
-  // DSE depth page returns two columns of rows: buy side / sell side
-  // Parse all <tr> rows, split each into bid/ask pair
-  out.levels = 0;
-  size_t pos = 0;
-  while (pos < html.size() && out.levels < 10) {
-    size_t rowStart = html.find("<tr", pos);
-    if (rowStart == std::string::npos)
-      break;
-    size_t rowEnd = html.find("</tr>", rowStart);
-    if (rowEnd == std::string::npos)
-      break;
-    std::string row = html.substr(rowStart, rowEnd - rowStart + 5);
-    pos = rowEnd + 5;
-
-    std::vector<std::string> cells;
-    if (!ExtractCells(row, cells) || cells.size() < 4)
-      continue;
-
-    float bp = ParseFloat(cells[0]);
-    int bv = ParseInt(cells[1]);
-    float sp = ParseFloat(cells[2]);
-    int sv = ParseInt(cells[3]);
-
-    if (bp > 0 || sp > 0) {
-      int i = out.levels;
-      out.buyPrice[i] = bp;
-      out.buyVolume[i] = bv;
-      out.sellPrice[i] = sp;
-      out.sellVolume[i] = sv;
-      out.levels++;
-    }
+  if (!Request(L"POST", "/ajax/load-instrument.php", headers,
+               "inst=" + dse::UrlEncode(symbol), html))
+    return false;
+  if (!dse::ParseDepth(html, out)) {
+    t_lastError = "Depth page layout not recognised";
+    return false;
   }
-  return out.levels > 0;
+  return true;
 }
 
-// ---------------------------------------------------------------------------
-// Fetch sector performance
-// ---------------------------------------------------------------------------
-bool DSEFetcher::FetchSectorPerformance(std::vector<DSESectorEntry> &out) {
-  out.clear();
-  std::string html;
-  if (!HttpGet(DSE_HOST, PATH_SECTOR, L"", html))
-    if (!HttpGet(DSE_ALT_HOST, PATH_SECTOR, L"", html))
-      return false;
-  return ParseSectorTable(html, out);
-}
-
-bool DSEFetcher::ParseSectorTable(const std::string &html,
-                                  std::vector<DSESectorEntry> &out) {
-  std::string tableHtml;
-  // Sector table often has a different class — fall back to first table
-  if (!FindTableByClass(html, "table-bordered", tableHtml))
-    tableHtml = html;
-
-  bool header = true;
-  size_t pos = 0;
-  while (pos < tableHtml.size()) {
-    size_t rowStart = tableHtml.find("<tr", pos);
-    if (rowStart == std::string::npos)
-      break;
-    size_t rowEnd = tableHtml.find("</tr>", rowStart);
-    if (rowEnd == std::string::npos)
-      break;
-    std::string row = tableHtml.substr(rowStart, rowEnd - rowStart + 5);
-    pos = rowEnd + 5;
-
-    if (header) {
-      header = false;
-      continue;
-    }
-
-    std::vector<std::string> cells;
-    if (!ExtractCells(row, cells) || cells.size() < 3)
-      continue;
-
-    DSESectorEntry e = {};
-    strncpy_s(e.sector, cells[0].c_str(), 63);
-    e.change = ParseFloat(cells[1]);
-    e.volume = ParseFloat(cells[2]);
-    if (cells.size() >= 4)
-      e.value = ParseFloat(cells[3]);
-    out.push_back(e);
-  }
-  return !out.empty();
-}
-
-// ---------------------------------------------------------------------------
-// Fetch news
-// ---------------------------------------------------------------------------
 bool DSEFetcher::FetchNews(std::vector<DSENewsItem> &out) {
-  out.clear();
+  // The feed behind the site's "News Archive (7 Days)" page. It expects the
+  // headers of the site's own AJAX call.
+  static const wchar_t headers[] =
+      L"Content-Type: application/x-www-form-urlencoded\r\n"
+      L"X-Requested-With: XMLHttpRequest\r\n"
+      L"Referer: https://old.dsebd.org/news_archive_7days.php\r\n";
   std::string html;
-  if (!HttpGet(DSE_HOST, PATH_NEWS, L"", html))
-    if (!HttpGet(DSE_ALT_HOST, PATH_NEWS, L"", html))
-      return false;
-  return ParseNewsTable(html, out);
+  if (!Request(L"POST", "/ajax/load-news.php", headers, "criteria=2", html))
+    return false;
+  if (!dse::ParseNews(html, out)) {
+    t_lastError = "News page layout not recognised";
+    return false;
+  }
+  return true;
 }
 
-bool DSEFetcher::ParseNewsTable(const std::string &html,
-                                std::vector<DSENewsItem> &out) {
-  bool header = true;
-  size_t pos = 0;
-  while (pos < html.size()) {
-    size_t rowStart = html.find("<tr", pos);
-    if (rowStart == std::string::npos)
-      break;
-    size_t rowEnd = html.find("</tr>", rowStart);
-    if (rowEnd == std::string::npos)
-      break;
-    std::string row = html.substr(rowStart, rowEnd - rowStart + 5);
-    pos = rowEnd + 5;
-
-    if (header) {
-      header = false;
-      continue;
-    }
-
-    std::vector<std::string> cells;
-    if (!ExtractCells(row, cells) || cells.size() < 3)
-      continue;
-
-    DSENewsItem n = {};
-    strncpy_s(n.date, cells[0].c_str(), 15);
-    strncpy_s(n.company, cells[1].c_str(), 63);
-    strncpy_s(n.headline, cells[2].c_str(), 255);
-    out.push_back(n);
+bool DSEFetcher::FetchMarketStatus(std::string &status) {
+  std::string html;
+  if (!Request(L"GET", "/", nullptr, "", html))
+    return false;
+  if (!dse::ParseMarketStatus(html, status)) {
+    t_lastError = "Market status not found on the home page";
+    return false;
   }
-  return !out.empty();
+  return true;
 }

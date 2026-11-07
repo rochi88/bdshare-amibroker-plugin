@@ -4,6 +4,8 @@
 LIBRARY     "BDShare_DSE"
 
 EXPORTS
+    Init
+    Release
     GetPluginInfo
     GetPluginStatus
     GetQuotesEx

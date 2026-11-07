@@ -1,146 +1,52 @@
 #pragma once
 // ============================================================================
 // DSEFetcher.h
-// HTTP layer: fetches live, historical, depth, sector, and news data from DSE
-// using WinHTTP so the DLL has no external runtime dependencies.
+// WinHTTP client for the legacy DSE site, so the DLL needs no extra runtime
+// dependencies. Safe to use from several threads.
+//
+// Only old.dsebd.org is used. The current site (dse.com.bd) answers declared
+// automated clients with "403 Forbidden: automated access to this site is not
+// permitted", so do not point this at it or send a browser User-Agent to get
+// past that. See README, "Data source".
 // ============================================================================
 
-#ifndef _DSEFETCHER_H_
-#define _DSEFETCHER_H_
+#include "DSEParsers.h"
 
 #include <windows.h>
 #include <winhttp.h>
+
+#include <atomic>
 #include <string>
 #include <vector>
-#include <unordered_map>
 
-#pragma comment(lib, "winhttp.lib")
-
-// ---------------------------------------------------------------------------
-// Data structures returned by the fetcher
-// ---------------------------------------------------------------------------
-
-struct DSEQuote
-{
-    char    symbol[32];
-    float   open;
-    float   high;
-    float   low;
-    float   close;
-    float   ltp;        // last traded price
-    float   ycp;        // yesterday close price
-    float   change;
-    float   volume;
-    float   value;
-    int     trade;
-    int     year, month, day;
-    int     hour, minute, second;
-};
-
-struct DSEDepth
-{
-    float   buyPrice[10];
-    int     buyVolume[10];
-    float   sellPrice[10];
-    int     sellVolume[10];
-    int     levels;     // number of valid levels
-};
-
-struct DSESectorEntry
-{
-    char    sector[64];
-    float   change;
-    float   volume;
-    float   value;
-};
-
-struct DSENewsItem
-{
-    char    company[64];
-    char    headline[256];
-    char    date[16];       // YYYY-MM-DD
-};
-
-// ---------------------------------------------------------------------------
-// DSEFetcher class
-// ---------------------------------------------------------------------------
-class DSEFetcher
-{
+class DSEFetcher {
 public:
-    DSEFetcher();
-    ~DSEFetcher();
+  bool Init();
+  void Shutdown();
+  // Stops further retries; requests already in flight end at their timeout.
+  void Cancel() { m_cancelled = true; }
+  void ResetCancel() { m_cancelled = false; }
 
-    bool Init();
-    void Shutdown();
+  bool FetchLive(std::vector<DSEQuote> &out);
+  // Dates are YYYY-MM-DD. The site serves at most the last two years.
+  bool FetchHistorical(const std::string &symbol, const std::string &startDate,
+                       const std::string &endDate, std::vector<DSEBar> &out);
+  bool FetchDepth(const std::string &symbol, DSEDepth &out);
+  bool FetchNews(std::vector<DSENewsItem> &out);
+  bool FetchMarketStatus(std::string &status);
 
-    // Live prices — fills result vector; returns true on success
-    bool FetchLive( std::vector<DSEQuote>& out );
-
-    // Historical OHLCV for a symbol between startDate and endDate (YYYY-MM-DD)
-    bool FetchHistorical( const std::string& symbol,
-                          const std::string& startDate,
-                          const std::string& endDate,
-                          std::vector<DSEQuote>& out );
-
-    // Market depth (order book) for a symbol
-    bool FetchDepth( const std::string& symbol, DSEDepth& out );
-
-    // Sector performance
-    bool FetchSectorPerformance( std::vector<DSESectorEntry>& out );
-
-    // Latest news
-    bool FetchNews( std::vector<DSENewsItem>& out );
-
-    // Return last HTTP error description
-    std::string LastError() const { return m_lastError; }
+  // Description of the last failure on the calling thread.
+  static std::string LastError();
 
 private:
-    // HTTP helpers
-    bool        HttpGet( const std::wstring& host,
-                         const std::wstring& path,
-                         const std::wstring& query,
-                         std::string& responseBody );
+  bool Request(const wchar_t *verb, const std::string &pathAndQuery,
+               const wchar_t *headers, const std::string &postBody,
+               std::string &responseBody);
+  bool RequestOnce(const wchar_t *verb, const std::wstring &path,
+                   const wchar_t *headers, const std::string &postBody,
+                   std::string &responseBody, bool &retryable);
 
-    bool        HttpPost( const std::wstring& host,
-                          const std::wstring& path,
-                          const std::string&  postBody,
-                          std::string& responseBody );
-
-    // HTML table parsers
-    bool        ParseLiveTable   ( const std::string& html, std::vector<DSEQuote>& out );
-    bool        ParseHistTable   ( const std::string& html, std::vector<DSEQuote>& out );
-    bool        ParseDepthTable  ( const std::string& html, DSEDepth& out );
-    bool        ParseSectorTable ( const std::string& html, std::vector<DSESectorEntry>& out );
-    bool        ParseNewsTable   ( const std::string& html, std::vector<DSENewsItem>& out );
-
-    // String helpers
-    static std::string  StripTags   ( const std::string& html );
-    static std::string  Trim        ( const std::string& s );
-    static float        ParseFloat  ( const std::string& s );
-    static int          ParseInt    ( const std::string& s );
-    static bool         SplitDate   ( const std::string& s,
-                                      int& y, int& m, int& d );
-
-    // Extract text content of the Nth <td> in a <tr>
-    static bool         ExtractCells( const std::string& row,
-                                      std::vector<std::string>& cells );
-
-    // Find all occurrences of tag content matching a class
-    static bool         FindTableByClass( const std::string& html,
-                                          const std::string& cls,
-                                          std::string& tableHtml );
-
-    HINTERNET   m_hSession  = nullptr;
-    std::string m_lastError;
-
-    // DSE endpoints
-    static constexpr wchar_t DSE_HOST[]        = L"www.dsebd.org";
-    static constexpr wchar_t DSE_ALT_HOST[]    = L"dsebd.org";
-    static constexpr wchar_t PATH_LIVE[]       = L"/latest_share_price_scroll_l.php";
-    static constexpr wchar_t PATH_HIST[]       = L"/day_end_archive.php";
-    static constexpr wchar_t PATH_DEPTH[]      = L"/ajax_mkt_depth.php";
-    static constexpr wchar_t PATH_SECTOR[]     = L"/sector_performance.php";
-    static constexpr wchar_t PATH_NEWS[]       = L"/news.php";
+  HINTERNET m_hSession = nullptr;
+  HINTERNET m_hConnect = nullptr;
+  std::atomic<bool> m_cancelled{false};
 };
-
-#endif // _DSEFETCHER_H_

@@ -1,19 +1,43 @@
 # BDShare DSE AmiBroker Data Plugin
 
-A native C++ AmiBroker data feed plugin (ADK 2.10) that streams live and
-historical data from the Dhaka Stock Exchange (DSE) directly into AmiBroker.
+A native C++ AmiBroker data feed plugin (ADK 2.10) that brings live and
+historical data from the Dhaka Stock Exchange (DSE) into AmiBroker.
 
 ## Features
 
 | Feature | Detail |
 |---|---|
-| Live prices | OHLCV + change, value, trade count — polled every ~5 s |
-| Historical OHLCV | Up to 2 years of EOD data fetched on demand per symbol |
-| Market depth | Best bid/ask price and volume via `GetExtraData()` |
-| Sector performance | Sector change % refreshed every ~60 s |
-| News | Latest DSE headlines refreshed every ~60 s |
+| Live prices | High, low, last price, change, value, trade count. Polled every 15 s during the session |
+| Historical OHLCV | Last 2 years of daily data per symbol, cached for 30 minutes |
+| Market depth | Best bid/ask price and volume via `GetExtraData()`, cached for 30 s |
+| News | Last 7 days of DSE items per symbol, refreshed every 10 minutes in session |
+| Market status | Open or closed, in the status bar and via `GetExtraData()` |
 | Transport | WinHTTP (no extra DLL dependencies) |
-| Architecture | x86 or x64 — must match your AmiBroker install |
+| Architecture | x86 or x64. Must match your AmiBroker install |
+
+See [CHANGELOG.md](CHANGELOG.md) for what changed in each version.
+
+---
+
+## Data source
+
+All data comes from DSE's legacy website, `old.dsebd.org`, using the same pages
+as the [bdshare](https://github.com/rochi88/bdshare) Python package. DSE offers
+no official API or WebSocket feed, so the plugin reads HTML tables.
+
+**The plugin does not use the current site, `dse.com.bd`.** It answers declared
+automated clients with `403 Forbidden: automated access to this site is not
+permitted`. It responds differently to browser User-Agents, but pretending to be
+a browser would get around DSE's stated rule, so the plugin identifies itself
+honestly as `BDShare-AmiBroker/<version>`. Switching to the current site's data
+would need DSE's permission.
+
+The legacy site could be retired without notice, as the older `dsebd.org` pages
+were. If the feed stops, run `python tests/check_endpoints.py` to see which page
+changed.
+
+Please keep polling modest. Every running copy of the plugin adds load to a public
+service; the intervals are constants at the top of `src/Plugin.cpp`.
 
 ---
 
@@ -21,9 +45,9 @@ historical data from the Dhaka Stock Exchange (DSE) directly into AmiBroker.
 
 - **Visual Studio 2019 / 2022** (MSVC toolchain)
 - **CMake 3.16+**
-- **AmiBroker 5.27+** (ADK 2.10 `GetQuotesEx` API)
+- **AmiBroker 5.30+** (ADK 2.10 `GetQuotesEx` API)
 - Windows 7 or later (WinHTTP ships with Windows)
-- Internet access to `www.dsebd.org`
+- Internet access to `old.dsebd.org`
 
 ---
 
@@ -43,6 +67,21 @@ cmake --build build64 --config Release
 ```
 
 The output DLL is at `build32\Release\BDShare_DSE.dll` (or `build64\...`).
+
+### Tests
+
+The parsers and bar logic are platform-neutral and tested against real DSE pages
+saved in `tests/fixtures/`. On Windows, after a build above:
+
+```cmd
+ctest --test-dir build64 -C Release --output-on-failure
+```
+
+Other platforms build only the tests:
+
+```sh
+cmake -S . -B build && cmake --build build && ctest --test-dir build --output-on-failure
+```
 
 ### Auto-deploy
 
@@ -64,24 +103,25 @@ cmake --build build32 --config Release
 2. Start AmiBroker.
 3. Go to **File → Database Settings**.
 4. Set **Data source** to `BDShare DSE Data Feed`.
-5. Click **Configure** — a confirmation dialog will appear and the
-   streaming thread will start.
+5. Click **Configure**. This imports the DSE symbols and shows how many were added.
+
+Use an **end-of-day** database for history. DSE publishes no intraday history, so
+an intraday database starts empty and builds bars only while AmiBroker is running
+during a session.
 
 ---
 
 ## Adding symbols
 
-Each symbol's **Name** (the ticker field in AmiBroker) must match its DSE
-trading code exactly, e.g.:
+**Configure** imports every instrument on DSE's latest share price page. To add
+one by hand, set its **Name** (the ticker field in AmiBroker) to its DSE trading
+code exactly, e.g.:
 
 | DSE code | Name in AmiBroker |
 |---|---|
 | `GP` | `GP` |
 | `ACI` | `ACI` |
 | `BEXIMCO` | `BEXIMCO` |
-
-AmiBroker will call `GetQuotesEx("GP", ...)` and the plugin maps that string
-to the DSE scraper.
 
 ---
 
@@ -90,38 +130,38 @@ to the DSE scraper.
 Copy `scripts/BDShare_DSE_Dashboard.afl` to your AmiBroker `Formulas\`
 folder and apply it to any chart. The included formula demonstrates:
 
-- Candlestick chart coloured by daily change
-- Best bid / ask horizontal reference lines (from `GetExtraData`)
-- Yesterday's close reference line
+- Candlestick chart coloured by daily change, with volume
+- Best bid / ask reference lines (from `GetExtraData`)
 - MA(20), MA(50), EMA(10) overlays
-- RSI(14) sub-panel
-- News count and sector change display
+- RSI(14) on its own scale
+- Traded value, trade count, market status and the latest headline in the title
 
 ### GetExtraData reference
 
-```afl
-// Per-symbol depth
-BidPrice = GetExtraData( Name(), "BidPrice", BarCount, 1, 1 );
-BidVol   = GetExtraData( Name(), "BidVol",   BarCount, 1, 1 );
-AskPrice = GetExtraData( Name(), "AskPrice", BarCount, 1, 1 );
-AskVol   = GetExtraData( Name(), "AskVol",   BarCount, 1, 1 );
+All fields apply to the current symbol.
 
-// Global
-SectorChg  = GetExtraData( "", "SectorChg",  BarCount, 1, 1 );
-NewsCount  = GetExtraData( "", "NewsCount",  BarCount, 1, 1 );
+```afl
+BidPrice = GetExtraData( "BidPrice" );      // array; Null if no bids
+BidVol   = GetExtraData( "BidVol" );        // array; Null if no bids
+AskPrice = GetExtraData( "AskPrice" );      // array; Null if no asks
+AskVol   = GetExtraData( "AskVol" );        // array; Null if no asks
+
+MarketOpen = GetExtraData( "MarketOpen" );    // 1 during a session, otherwise 0
+NewsCount  = GetExtraData( "NewsCount" );     // this symbol's items in the feed
+Headline   = GetExtraData( "NewsHeadline" );  // string: "YYYY-MM-DD: title"
 ```
 
 ### Built-in fields populated by the plugin
 
-| AmiBroker field | Live (intraday) | EOD |
+| AmiBroker field | Intraday database | End-of-day database |
 |---|---|---|
-| `O` | Last close (DSE doesn't expose live open) | Daily open |
-| `H` | Day high | Daily high |
-| `L` | Day low | Daily low |
+| `O` | First price in the bar | Daily open |
+| `H` | Highest price seen in the bar | Daily high |
+| `L` | Lowest price seen in the bar | Daily low |
 | `C` | Last traded price | Daily close |
-| `V` | Volume | Volume |
-| `AuxData()` | Yesterday's close (YCP) | Traded value |
-| `AuxData2()` | Price change (Δ) | Trade count |
+| `V` | Volume traded in the bar | Volume |
+| `Aux1` | Yesterday's close (YCP) | Traded value (million BDT) |
+| `Aux2` | Price change (Δ) | Trade count |
 
 ---
 
@@ -129,13 +169,17 @@ NewsCount  = GetExtraData( "", "NewsCount",  BarCount, 1, 1 );
 
 The plugin paints a coloured icon in AmiBroker's status bar:
 
-| Colour | Meaning |
-|---|---|
-| 🟢 Green | Live data — OK |
-| 🟠 Orange | Waiting / retrying |
-| 🔵 Blue | Connecting |
-| 🔴 Red | Error |
-| ⚫ Grey | Disconnected |
+| Colour | Text | Meaning |
+|---|---|---|
+| 🟢 Green | `LIVE` | Market open, data OK |
+| 🔘 Blue-grey | `CLSD` | Market closed, data OK |
+| 🟠 Orange | `WAIT` | Fetch failed or market status unknown, retrying |
+| 🔵 Blue | `CONN` | Connecting |
+| 🔴 Red | `ERR!` | Could not start the HTTP client |
+| ⚫ Grey | `----` | Disconnected |
+
+For diagnostics, set the `BDSHARE_DEBUG` environment variable to log to
+`%TEMP%\bdshare_plugin_debug.log`. Messages also go to the Windows debug output.
 
 ---
 
@@ -144,36 +188,43 @@ The plugin paints a coloured icon in AmiBroker's status bar:
 ```
 AmiBroker
   │
+  ├─ Init() / Release()   ← DLL load / unload: HTTP client, stop the thread
   ├─ GetPluginInfo()      ← DLL identification at load time
-  ├─ Configure()          ← User selects plugin; streaming thread starts
-  ├─ Notify()             ← Database load/unload events
+  ├─ Configure()          ← User selects plugin; imports symbols
+  ├─ Notify()             ← Database load/unload: start/stop the thread
   ├─ GetPluginStatus()    ← Status bar icon refresh
   ├─ GetQuotesEx()        ← Called per symbol when AB needs data
-  │    ├─ EOD path        → DSEFetcher::FetchHistorical() (synchronous)
-  │    └─ RT path         → g_liveCache lookup (lock-free read)
-  └─ GetExtraData()       ← Depth / sector / news arrays
-       └─ DSEFetcher::FetchDepth()  (per-call, synchronous)
+  │    ├─ EOD path        → history cache (fetches when stale) + live session bar
+  │    └─ Intraday path   → g_liveCache folded into the current bar
+  └─ GetExtraData()       ← Depth cache (fetches when stale) / status / news
 
 Background thread (StreamingThread)
-  └─ every 5 s:  DSEFetcher::FetchLive()
+  └─ every 1 min around the session, 15 min otherwise: FetchMarketStatus()
+  └─ every 15 s in session: FetchLive()
        → update g_liveCache
        → PostMessage(WM_USER_STREAMING_UPDATE) → AB calls GetQuotesEx() again
-  └─ every 60 s: DSEFetcher::FetchSectorPerformance()
-                 DSEFetcher::FetchNews()
+     outside the session: once at startup and once after the close
+  └─ every 10 min in session, 60 min otherwise: FetchNews()
 ```
 
 ---
 
 ## Known limitations
 
-- DSE does not provide a WebSocket or official API; all data is scraped from
-  HTML tables. If DSE changes its page layout the parsers will need updating.
-- Live "open" price is approximated as the previous close because DSE's live
-  table does not include a separate open column.
-- The plugin polls at ~5 s intervals. True tick-by-tick data is not available
-  from the public DSE website.
-- AmiBroker's `GetExtraData()` returns array fills (same value repeated for
-  all bars) for depth data — this is expected and correct for real-time use.
+- DSE has no official API; all data is scraped from HTML tables. If DSE changes
+  a page layout the parsers will need updating.
+- History is limited to the last 2 years, DSE's limit on both of its sites. Older
+  bars already stored in a local AmiBroker database are kept.
+- The live page has no open price. Today's bar in an end-of-day database uses
+  yesterday's close (clamped to the day's range) as the open until the day-end
+  archive has the official row.
+- An intraday bar's volume is worked out from DSE's cumulative daily figure, so
+  the first bar after starting mid-session holds all the volume traded so far.
+- `GetExtraData()` depth values are the same value for every bar (the latest
+  book), so use the last value.
+- A first request for a symbol's history blocks AmiBroker briefly on its UI
+  thread, and an outage can stall it for up to about a minute before the failure
+  is remembered. Later calls use the cache.
 
 ---
 
@@ -190,40 +241,32 @@ For testing, `BDSE` is fine.
 ```
 bdshare-amibroker-plugin/
 │
-├── CMakeLists.txt                  # Build system — generates MSVC project (x86/x64)
-├── README.md                       # Build, install, and AFL usage guide
+├── CMakeLists.txt                  # Builds the DLL (Windows) and the unit tests
+├── CHANGELOG.md
+├── README.md
 │
-├── include/                        # Header files
-│   ├── Plugin.h                    # ADK 2.10 types: Quotation, PluginInfo,
-│   │                               #   AmiDate, PackDate, PluginNotification,
-│   │                               #   PluginStatus, InfoSite, GQEContext
-│   └── DSEFetcher.h                # HTTP fetcher interface: DSEQuote, DSEDepth,
-│                                   #   DSESectorEntry, DSENewsItem, DSEFetcher
+├── include/
+│   ├── Plugin.h                    # ADK 2.10 types and entry points
+│   ├── DSEParsers.h                # Data types, page parsers, Dhaka time helpers
+│   ├── BarMerge.h                  # Writing data into AmiBroker's quote array
+│   └── DSEFetcher.h                # WinHTTP client for old.dsebd.org
 │
-├── src/                            # Implementation files
-│   ├── Plugin.cpp                  # All 6 ADK entry points:
-│   │                               #   GetPluginInfo()     — DLL identity
-│   │                               #   GetPluginStatus()   — status bar icon
-│   │                               #   Configure()         — start stream thread
-│   │                               #   Notify()            — DB load/unload events
-│   │                               #   GetQuotesEx()       — OHLCV data pump
-│   │                               #   GetExtraData()      — depth/sector/news
-│   │
-│   ├── DSEFetcher.cpp              # WinHTTP network layer + HTML table parsers:
-│   │                               #   FetchLive()         — current prices
-│   │                               #   FetchHistorical()   — EOD OHLCV
-│   │                               #   FetchDepth()        — order book
-│   │                               #   FetchSectorPerformance()
-│   │                               #   FetchNews()
-│   │
-│   └── Plugin.def                  # DLL export map — prevents MSVC name mangling
+├── src/
+│   ├── Plugin.cpp                  # ADK entry points, caches, streaming thread
+│   ├── DSEFetcher.cpp              # HTTP requests, retries and back-off
+│   ├── DSEParsers.cpp              # HTML parsing (platform-neutral)
+│   └── Plugin.def                  # DLL export map
 │
-└── scripts/                        # AFL formulas
-    └── BDShare_DSE_Dashboard.afl   # Ready-to-use chart formula:
-                                    #   candlesticks, bid/ask lines, YCP,
-                                    #   MA(20/50), EMA(10), RSI(14),
-                                    #   GetExtraData() depth/news examples
+├── scripts/
+│   └── BDShare_DSE_Dashboard.afl   # Ready-to-use chart formula
+│
+└── tests/
+    ├── test_main.cpp               # Unit tests (run with ctest)
+    ├── check_endpoints.py          # Checks the live DSE pages still match
+    ├── fixtures/                   # Real DSE pages, trimmed
+    └── stub/windows.h              # Lets Plugin.h compile on non-Windows
 ```
+
 ---
 
 ## License

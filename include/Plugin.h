@@ -274,6 +274,7 @@ struct PluginStatus {
 #define STATUS_DISCONNECTED 2
 #define STATUS_ERROR        3
 #define STATUS_CONNECTING   4
+#define STATUS_CLOSED       5
 
 // ── StockInfo ─────────────────────────────────────────────────────────────────
 #define MAX_SYMBOL_LEN 48

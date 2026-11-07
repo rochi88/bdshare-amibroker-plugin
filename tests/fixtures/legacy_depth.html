@@ -1,0 +1,126 @@
+
+	<style>
+		.bg-danger{
+			background: #FFFFCC;
+			border: 1px solid #663366;
+			padding: 5px 20px;
+		}
+		.blink_me {
+			animation: blinker 2s linear infinite;
+		}
+		@keyframes blinker {  
+			50% { opacity: 0; }
+		}
+	</style>
+
+	<div class="col-md-12 col-sm-12 col-xs-18 center-block-custom table-responsive">
+		<style>
+		.table > thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td{
+			border-top: 0px;
+		}
+		</style>
+						<table class="table" border="0">
+					<tr>
+						<td width="15%">&nbsp;</td>
+						<th>
+							<div align="center" style="padding: 1px">
+								Instrument : <strong><a href="displayCompany.php?name=GP">GP</a></strong>&nbsp;&nbsp;&nbsp;&nbsp;
+								<input type="button" class="btn btn-primary btn-sm btn-mpr" onclick="loadMPR()" name="" value="Refresh" />
+							</div>						
+						</th>
+						<td width="15%">&nbsp;</td>
+					</tr>
+					<tr>
+						<td width="15%" valign="top">&nbsp;</td>
+						<td width="75%" valign="top">
+							<table class="table table-stripped">
+								<tr>
+									<td width="50%" valign="top">
+										<table width="100%"  border="0" cellpadding="1" cellspacing="1" bgcolor="#E8FFFB">
+											<tr bgcolor="#339966">
+												<td height="34%" colspan="2"><div align="center"><strong><font color="#FFFFFF">Buy</font></strong></div></td>
+											</tr>
+											<tr>
+												<td width="50%" bgcolor="#D2F0E1"><div align="center">Buy Price </div></td>
+												<td height="34%" bgcolor="#D2F0E1"><div align="center">Buy Volume </div></td>
+											</tr>
+																						<tr>
+												<td bgcolor="#CCCCCC"><div align="center">226.60</div></td>
+												<td bgcolor="#CCCCCC"><div align="center">10</div></td>
+											</tr>
+																						<tr>
+												<td bgcolor="#CCCCCC"><div align="center">226.50</div></td>
+												<td bgcolor="#CCCCCC"><div align="center">89</div></td>
+											</tr>
+																					</table>
+									</td>
+									<td valign="top" bgcolor="#FFFFFF">
+										<table width="100%"  border="0" cellspacing="1" cellpadding="1">
+											<tr bgcolor="#339966">
+												<td height="34%" colspan="2"><div align="center"><strong><font color="#FFFFFF">Sell</font></strong></div></td>
+											</tr>
+											<tr>
+												<td width="51%" bgcolor="#D2F0E1"><div align="center">Sell Price </div></td>
+												<td width="49%" height="34%" bgcolor="#D2F0E1"><div align="center">Sell Volume </div></td>
+											</tr>
+																					</table>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td width="15%" valign="top">&nbsp;</td>
+					</tr>
+					<!--tr>
+						<td valign="top">&nbsp;</td>
+						<td valign="top">&nbsp;</td>
+						<td valign="top">&nbsp;</td>
+					</tr-->
+					<tr>
+						<td valign="top">&nbsp;</td>
+						<td valign="top">
+							<table width="100%"  border="0" align="center" cellpadding="2" cellspacing="2" style="background: #FFFFFF;">
+								<tr bgcolor="#339966">
+									<td colspan="4"><font color="#FFFFFF"><strong>Price Statistics </strong></font> </td>
+								</tr>
+								<tr>
+									<td>Open Price </td>
+									<td>: 230.2</td>
+									<td><div align="right">Day's High : </div></td>
+									<td>231</td>
+								</tr>
+								<tr>
+									<td width="27%">Last Trade Price</td>
+									<td width="14%">: 226.9</td>
+									<td width="40%"><div align="right">Day's Low : </div></td>
+									<td width="19%">226.6</td>
+								</tr>
+								<tr>
+									<td>Yesterday Close Price </td>
+									<td>: 230.2</td>
+									<td><div align="right">No. of Trade : </div></td>
+									<td>3370</td>
+								</tr>
+								<tr>
+									<td>Close Price </td>
+									<td>: 226.9									<div align="right"></div></td>
+									<td><div align="right">Total Volume : </div></td>
+									<td>251543</td>
+								</tr>
+								<tr>
+									<td>&nbsp;</td>
+									<td>&nbsp;</td>
+									<td><div align="right">Total Value (mn): </div></td>
+									<td>57.281</td>
+								</tr>
+							</table>
+						</td>
+						<td valign="top">&nbsp;</td>
+					</tr>
+					<tr>
+						<td valign="top">&nbsp;</td>
+						<td valign="top">&nbsp;</td>
+						<td valign="top">&nbsp;</td>
+					</tr>
+				</table>			
+					</div>
+	

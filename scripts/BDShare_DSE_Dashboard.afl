@@ -1,6 +1,7 @@
 // ============================================================================
 // BDShare_DSE_Dashboard.afl
 // Sample AFL formula demonstrating how to use BDShare DSE plugin data.
+// Written for an end-of-day database.
 //
 // Prerequisites:
 //   1. BDShare_DSE.dll installed in AmiBroker\Plugins\
@@ -8,72 +9,50 @@
 //   3. AmiBroker data source set to "BDShare DSE Data Feed"
 // ============================================================================
 
-_SECTION_BEGIN("BDShare DSE Live Dashboard");
+_SECTION_BEGIN("BDShare DSE Dashboard");
 
-// ── Basic OHLCV (automatically supplied via GetQuotesEx) ──────────────────
-Plot( C, "Close",  colorWhite,  styleLine  | styleThick );
-Plot( O, "Open",   colorGreen,  styleDots  );
-Plot( H, "High",   colorLime,   styleLine  );
-Plot( L, "Low",    colorRed,    styleLine  );
+// -- Price and volume (supplied via GetQuotesEx) ------------------------------
+SetChartOptions( 0, chartShowDates );
+Plot( C, "Close", IIf( C >= Ref( C, -1 ), colorGreen, colorRed ), styleCandle );
+Plot( V, "Volume", colorBlue, styleHistogram | styleOwnScale | styleNoLabel, 0, 4 * HHV( V, 100 ) );
 
-// ── Volume bars ───────────────────────────────────────────────────────────
-Plot( V, "Volume", colorBlue, styleHistogram | styleOwnScale );
+// -- Moving averages ----------------------------------------------------------
+Plot( MA( C, 20 ),  "MA(20)",  colorYellow, styleLine );
+Plot( MA( C, 50 ),  "MA(50)",  colorOrange, styleLine );
+Plot( EMA( C, 10 ), "EMA(10)", colorViolet, styleLine );
 
-// ── Price-change colouring ────────────────────────────────────────────────
-// AuxData2 is loaded into the 'OpenInterest' field slot by the plugin;
-// access it via the built-in OpenInt() array.
-ChangeArr = AuxData2();    // price change vs yesterday
-BarColor  = IIf( ChangeArr >= 0, colorGreen, colorRed );
-PlotOHLC( O, H, L, C, "", BarColor, styleCandle );
+// -- Daily extras: in an EOD database Aux1 is traded value (mn), Aux2 is trades -
+TradedValue = Aux1;
+TradeCount  = Aux2;
 
-// ── Market Depth (best bid/ask) ───────────────────────────────────────────
-BidPrice = GetExtraData( Name(), "BidPrice", BarCount, 1, 1 );
-AskPrice = GetExtraData( Name(), "AskPrice", BarCount, 1, 1 );
-BidVol   = GetExtraData( Name(), "BidVol",   BarCount, 1, 1 );
-AskVol   = GetExtraData( Name(), "AskVol",   BarCount, 1, 1 );
+// -- Market depth: best bid/ask for the current symbol ------------------------
+// Each is Null when that side of the book has no orders. Fetched from DSE at
+// most every 30 seconds per symbol.
+BidPrice = LastValue( GetExtraData( "BidPrice" ) );
+BidVol   = LastValue( GetExtraData( "BidVol" ) );
+AskPrice = LastValue( GetExtraData( "AskPrice" ) );
+AskVol   = LastValue( GetExtraData( "AskVol" ) );
 
-// Display best bid/ask in the title
-Spread = AskPrice - BidPrice;
+Plot( BidPrice, "Bid", colorAqua,   styleLine | styleDashed | styleNoRescale );
+Plot( AskPrice, "Ask", colorOrange, styleLine | styleDashed | styleNoRescale );
+
+// -- Session and news ---------------------------------------------------------
+MarketOpen = GetExtraData( "MarketOpen" );
+NewsCount  = GetExtraData( "NewsCount" );
+Headline   = GetExtraData( "NewsHeadline" );
+
 Title = StrFormat(
-    "{{NAME}}  |  O: %5.2f  H: %5.2f  L: %5.2f  C: %5.2f  V: %g\n"
-    "Bid: %5.2f (%g)  |  Ask: %5.2f (%g)  |  Spread: %5.2f",
-    O, H, L, C, V,
-    LastValue(BidPrice), LastValue(BidVol),
-    LastValue(AskPrice), LastValue(AskVol),
-    LastValue(Spread)
-);
+    "{{NAME}} - {{DATE}}  O %.2f  H %.2f  L %.2f  C %.2f  V %.0f  Value %.2f mn  Trades %.0f\n"
+    + "Bid %.2f (%.0f)  Ask %.2f (%.0f)  News items %.0f\n",
+    O, H, L, C, V, TradedValue, TradeCount,
+    BidPrice, BidVol, AskPrice, AskVol, NewsCount )
+    + WriteIf( MarketOpen, "Market open", "Market closed" )
+    + WriteIf( Headline != "", "  |  " + Headline, "" );
 
-// Horizontal reference lines for bid/ask
-HorizLine( LastValue(BidPrice), colorCyan );
-HorizLine( LastValue(AskPrice), colorOrange );
-
-// ── Yesterday's close ─────────────────────────────────────────────────────
-YCP = AuxData();    // AuxData1 = yesterday close price
-HorizLine( LastValue(YCP), colorGrey40 );
-
-// ── News & Sector indicator ───────────────────────────────────────────────
-NewsCount   = GetExtraData( "", "NewsCount",  BarCount, 1, 1 );
-SectorChg   = GetExtraData( "", "SectorChg",  BarCount, 1, 1 );
-
-AddTextColumn( StrFormat("%g", LastValue(NewsCount)), "News Count", 1 );
-AddTextColumn( StrFormat("%.2f%%", LastValue(SectorChg)), "Sector Chg", 1 );
-
-// ── Simple moving averages (standard AFL) ────────────────────────────────
-MA20  = MA( C, 20 );
-MA50  = MA( C, 50 );
-EMA10 = EMA( C, 10 );
-
-Plot( MA20,  "MA(20)",  colorYellow, styleLine );
-Plot( MA50,  "MA(50)",  colorOrange, styleLine );
-Plot( EMA10, "EMA(10)", colorViolet, styleLine );
-
-// ── RSI panel ─────────────────────────────────────────────────────────────
-_SECTION_BEGIN("RSI");
-    r = RSI(14);
-    Plot( r, "RSI(14)", colorWhite, styleLine );
-    Plot( 70, "OB", colorRed,   styleLine | styleNoLabel );
-    Plot( 30, "OS", colorGreen, styleLine | styleNoLabel );
-    PlotGrid( 50, colorGrey40 );
-_SECTION_END();
+// -- RSI, drawn on its own 0-100 scale over the price pane --------------------
+RsiValue = RSI( 14 );
+Plot( RsiValue, "RSI(14)", colorWhite, styleLine | styleOwnScale | styleNoLabel, 0, 100 );
+Plot( 70, "", colorRed,   styleLine | styleOwnScale | styleNoLabel, 0, 100 );
+Plot( 30, "", colorGreen, styleLine | styleOwnScale | styleNoLabel, 0, 100 );
 
 _SECTION_END();
